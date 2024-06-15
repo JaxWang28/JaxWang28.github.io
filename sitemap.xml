@@ -2,22 +2,17 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://jaxwang28.github.io/</loc>
+    <loc>https://blog.jaxwang.top/</loc>
     <lastmod>2024-06-15T10:02:46+08:00</lastmod>
   </url><url>
-    <loc>https://jaxwang28.github.io/posts/</loc>
+    <loc>https://blog.jaxwang.top/posts/</loc>
     <lastmod>2024-06-15T10:02:46+08:00</lastmod>
   </url><url>
-    <loc>https://jaxwang28.github.io/posts/set_up_image_hosting_with_cloudflare_r2/</loc>
+    <loc>https://blog.jaxwang.top/posts/set_up_image_hosting_with_cloudflare_r2/</loc>
     <lastmod>2024-06-15T10:02:46+08:00</lastmod>
   </url><url>
-    <loc>https://jaxwang28.github.io/posts/%E4%BD%BF%E7%94%A8-hugo-obsidian-github-%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/</loc>
-    <lastmod>2024-06-15T10:02:46+08:00</lastmod>
+    <loc>https://blog.jaxwang.top/categories/</loc>
   </url><url>
-    <loc>https://jaxwang28.github.io/posts/setting_up_blog_system_using_hugo_and_obsidian/</loc>
-  </url><url>
-    <loc>https://jaxwang28.github.io/categories/</loc>
-  </url><url>
-    <loc>https://jaxwang28.github.io/tags/</loc>
+    <loc>https://blog.jaxwang.top/tags/</loc>
   </url>
 </urlset>
