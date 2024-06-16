@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Arkdown on Jackson Blog</title>
-    <link>https://blog.jaxwang.top/tags/arkdown/</link>
-    <description>Recent content in Arkdown on Jackson Blog</description>
+    <title>Namesilo on Jackson Blog</title>
+    <link>https://blog.jaxwang.top/tags/namesilo/</link>
+    <description>Recent content in Namesilo on Jackson Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 16 Jun 2024 00:02:46 +0800</lastBuildDate>
-    <atom:link href="https://blog.jaxwang.top/tags/arkdown/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://blog.jaxwang.top/tags/namesilo/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Namesilo 域名解析到 CloudFlare</title>
       <link>https://blog.jaxwang.top/post/2024/06/16/namesilo-%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90%E5%88%B0-cloudflare/</link>
