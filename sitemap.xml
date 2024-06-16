@@ -2,11 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://blog.jaxwang.top/posts/configuring_a_custom_domain_for_github_pages/</loc>
+    <lastmod>2024-06-16T10:02:46+08:00</lastmod>
+  </url><url>
     <loc>https://blog.jaxwang.top/</loc>
-    <lastmod>2024-06-15T10:02:46+08:00</lastmod>
+    <lastmod>2024-06-16T10:02:46+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/posts/</loc>
-    <lastmod>2024-06-15T10:02:46+08:00</lastmod>
+    <lastmod>2024-06-16T10:02:46+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/posts/set_up_image_hosting_with_cloudflare_r2/</loc>
     <lastmod>2024-06-15T10:02:46+08:00</lastmod>
