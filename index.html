@@ -17,14 +17,25 @@
 <meta name="msapplication-config" content="/favicon/browserconfig.xml">
 <meta name="theme-color" content="#ffffff">
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-7S26TLKGMX"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '7S26TLKGMX');
+        }
+      </script>
+    
+  
 
-  gtag('config', 'G-7S26TLKGMX');
-</script>
 
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
   <meta name="referrer" content="no-referrer-when-downgrade">
