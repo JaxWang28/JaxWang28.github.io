@@ -6,8 +6,29 @@
     <description>Recent content in Tags on Jackson Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 18 Jun 2024 21:47:30 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 19 Jun 2024 23:29:42 +0800</lastBuildDate>
     <atom:link href="https://blog.jaxwang.top/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>IEEE80211</title>
+      <link>https://blog.jaxwang.top/tags/ieee80211/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://blog.jaxwang.top/tags/ieee80211/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>WiFi</title>
+      <link>https://blog.jaxwang.top/tags/wifi/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://blog.jaxwang.top/tags/wifi/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Wireless</title>
+      <link>https://blog.jaxwang.top/tags/wireless/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://blog.jaxwang.top/tags/wireless/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Hugo</title>
       <link>https://blog.jaxwang.top/tags/hugo/</link>
