@@ -59,9 +59,9 @@
     </item>
     <item>
       <title>使用 CloudFlare R2 搭建图床</title>
-      <link>https://blog.jaxwang.top/p/%E4%BD%BF%E7%94%A8-cloudflare-r2-%E6%90%AD%E5%BB%BA%E5%9B%BE%E5%BA%8A/</link>
+      <link>https://blog.jaxwang.top/p/cloudflare-r2-image/</link>
       <pubDate>Sat, 15 Jun 2024 10:02:46 +0800</pubDate>
-      <guid>https://blog.jaxwang.top/p/%E4%BD%BF%E7%94%A8-cloudflare-r2-%E6%90%AD%E5%BB%BA%E5%9B%BE%E5%BA%8A/</guid>
+      <guid>https://blog.jaxwang.top/p/cloudflare-r2-image/</guid>
       <description>为什么选择 Cloudflare R2 白嫖！白嫖！还是 TMD 白嫖！&#xA;R2 计费基于存储的数据总量及对数据执行的两类操作。无需支付任何出口费用。免费额度对于我们个人用户完全够用。(不被盗刷的情下)&#xA;创建 Bucket 配置 Bucket 桶创建完毕之后，我们需要配置 Bucket，主要是添加自定义域名和创建令牌。前者用来公共访问我们 Bucket 中的文件，后者用来帮助我们上传到 Bucket。&#xA;配置自定义域名：设置 -&amp;gt; 公开访问 -&amp;gt; 连接域&#xA;这里有 3 点要讲的：&#xA;自定义是用来公开访问我们的桶的 我们可以购买域名，然后在 Cloudflare 中注册管理 注册管理域名之后，可以在域中添加已经注册的域或子域 至于如何购买域名，在 CloudFlare 中注册可以 google it，或许我后面会出一期教程&#xA;创建令牌：管理令牌 -&amp;gt; 创建令牌&#xA;至此，令牌创建完毕，不要急着关闭此页面。&#xA;配置 PicGo PicGo 工具主要是用来帮助我们将图片上传到 R2 中。&#xA;首先安装上插件 S3。</description>
     </item>
     <item>
