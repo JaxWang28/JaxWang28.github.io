@@ -30,6 +30,13 @@
       <description>https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site&#xA;要设置 www 或自定义子域（例如 www.example.com 或 blog.example.com），必须在存储库设置中添加你的域。 然后，通过 DNS 提供商配置 CNAME 记录。&#xA;关于域名解析记录的分类&#xA;类型 用途 A 用于将域名解析到 IPv4 address AAAA 用于将域名解析到 IPv6 address CNAME 用于将域名解析到另一个域名 Canonical Name </description>
     </item>
     <item>
+      <title>提交个人博客到 Google</title>
+      <link>https://blog.jaxwang.top/p/%E6%8F%90%E4%BA%A4%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E5%88%B0-google/</link>
+      <pubDate>Sun, 16 Jun 2024 07:02:46 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/p/%E6%8F%90%E4%BA%A4%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E5%88%B0-google/</guid>
+      <description>个人博客网站在没有被 Google 收录之前是不能被搜索到的，搜索引擎不会去检索 Github 仓库中的内容。因此，需要将网站提交给 Google 引擎。&#xA;检查是否收录 在搜索框中输入以下内容&#xA;site:https://blog.jaxwang.top/ 使用 Google Search Console 提交站点 卒 不使用此方法了，选择使用 Google Analytics，两全其美。&#xA;附上添加到 google 收录的四种方式：&#xA;Google Analytics HTML file HTML tag Google Tag Manager Domain name provider </description>
+    </item>
+    <item>
       <title>Namesilo 域名解析到 CloudFlare</title>
       <link>https://blog.jaxwang.top/p/namesilo-%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90%E5%88%B0-cloudflare/</link>
       <pubDate>Sun, 16 Jun 2024 00:02:46 +0800</pubDate>
@@ -37,25 +44,11 @@
       <description>购买流程就不详细描述了，从域名注册和使用 Cloudflare 解析开始写。 CloudFlare 提供域名解析服务，而且有免费 Plan 可以使用，因此下述流程的原理： 更换域名的默认解析服务器为 CloudFlare 域名解析服务器。</description>
     </item>
     <item>
-      <title>提交个人博客到 Google</title>
-      <link>https://blog.jaxwang.top/p/%E6%8F%90%E4%BA%A4%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E5%88%B0-google/</link>
-      <pubDate>Sun, 16 Jun 2024 00:02:46 +0800</pubDate>
-      <guid>https://blog.jaxwang.top/p/%E6%8F%90%E4%BA%A4%E4%B8%AA%E4%BA%BA%E5%8D%9A%E5%AE%A2%E5%88%B0-google/</guid>
-      <description>个人博客网站在没有被 Google 收录之前是不能被搜索到的，搜索引擎不会去检索 Github 仓库中的内容。因此，需要将网站提交给 Google 引擎。&#xA;检查是否收录 在搜索框中输入以下内容&#xA;site:https://blog.jaxwang.top/ 使用 Google Search Console 提交站点 卒 不使用此方法了，选择使用 Google Analysis ，两全其美。&#xA;附上添加到 google 收录的四种方式：&#xA;Google Analytics HTML file HTML tag Google Tag Manager Domain name provider </description>
-    </item>
-    <item>
       <title>使用 CloudFlare R2 搭建图床</title>
       <link>https://blog.jaxwang.top/p/%E4%BD%BF%E7%94%A8-cloudflare-r2-%E6%90%AD%E5%BB%BA%E5%9B%BE%E5%BA%8A/</link>
       <pubDate>Sat, 15 Jun 2024 10:02:46 +0800</pubDate>
       <guid>https://blog.jaxwang.top/p/%E4%BD%BF%E7%94%A8-cloudflare-r2-%E6%90%AD%E5%BB%BA%E5%9B%BE%E5%BA%8A/</guid>
       <description>为什么选择 Cloudflare R2 白嫖！白嫖！还是 TMD 白嫖！&#xA;R2 计费基于存储的数据总量及对数据执行的两类操作。无需支付任何出口费用。免费额度对于我们个人用户完全够用。(不被盗刷的情下)&#xA;创建 Bucket 配置 Bucket 桶创建完毕之后，我们需要配置 Bucket，主要是添加自定义域名和创建令牌。前者用来公共访问我们 Bucket 中的文件，后者用来帮助我们上传到 Bucket。&#xA;配置自定义域名：设置 -&amp;gt; 公开访问 -&amp;gt; 连接域&#xA;这里有 3 点要讲的：&#xA;自定义是用来公开访问我们的桶的 我们可以购买域名，然后在 Cloudflare 中注册管理 注册管理域名之后，可以在域中添加已经注册的域或子域 至于如何购买域名，在 CloudFlare 中注册可以 google it，或许我后面会出一期教程&#xA;创建令牌：管理令牌 -&amp;gt; 创建令牌&#xA;至此，令牌创建完毕，不要急着关闭此页面。&#xA;配置 PicGo PicGo 工具主要是用来帮助我们将图片上传到 R2 中。&#xA;首先安装上插件 S3。</description>
-    </item>
-    <item>
-      <title>使用 hugo obsidian github 搭建博客系统</title>
-      <link>https://blog.jaxwang.top/p/%E4%BD%BF%E7%94%A8-hugo-obsidian-github-%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/</link>
-      <pubDate>Sat, 15 Jun 2024 10:02:46 +0800</pubDate>
-      <guid>https://blog.jaxwang.top/p/%E4%BD%BF%E7%94%A8-hugo-obsidian-github-%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2%E7%B3%BB%E7%BB%9F/</guid>
-      <description>框架&#xA;obsidian --Enveloppe Plugin--&amp;gt; github rep --github action(hugo) --&amp;gt; github pages Hugo 配置 Github 配置 Obsidain 配置 踩坑记录 如何使用自定义域名，在 action 中要注明自定义域名，否则每次部署之后都是默认域名。 </description>
     </item>
   </channel>
 </rss>
