@@ -36,5 +36,26 @@
       <guid>https://blog.jaxwang.top/tags/hugo/</guid>
       <description></description>
     </item>
+    <item>
+      <title>Cloudflare</title>
+      <link>https://blog.jaxwang.top/tags/cloudflare/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://blog.jaxwang.top/tags/cloudflare/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Domain</title>
+      <link>https://blog.jaxwang.top/tags/domain/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://blog.jaxwang.top/tags/domain/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Namesilo</title>
+      <link>https://blog.jaxwang.top/tags/namesilo/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://blog.jaxwang.top/tags/namesilo/</guid>
+      <description></description>
+    </item>
   </channel>
 </rss>
