@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>使用 CloudFlare R2 搭建图床 | Jackson Blog</title>
+    <title>无线通信基础原理（一） | Jackson Blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
@@ -59,45 +59,42 @@
     </nav>
 
 <div class="article-meta">
-<h1><span class="title">使用 CloudFlare R2 搭建图床</span></h1>
+<h1><span class="title">无线通信基础原理（一）</span></h1>
 
 <h2 class="date">
- 2024/06/15 
+ 2024/06/19 
 &nbsp
 <span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>次阅读量</span>
 </h2>
 </div>
 
 <main>
-<h1 id="为什么选择-cloudflare-r2">为什么选择 Cloudflare R2</h1>
-<p>白嫖！白嫖！还是 TMD 白嫖！</p>
-<p>R2 计费基于存储的数据总量及对数据执行的两类操作。无需支付任何出口费用。免费额度对于我们个人用户完全够用。<em>(不被盗刷的情下)</em></p>
-<p><img src="https://img.jacksonwang28.top/2024/06/336ed2df579dd1a99322b4d4b748978d.png" alt=""></p>
-<h1 id="创建-bucket">创建 Bucket</h1>
-<p><img src="https://img.jacksonwang28.top/2024/06/f0c424e0420f8dbe2b1ae5c73fab0c94.png" alt=""></p>
-<p><img src="https://img.jacksonwang28.top/2024/06/e277b0bd1504f73ac73a2697b078b0c8.png" alt=""></p>
-<h1 id="配置-bucket">配置 Bucket</h1>
-<p>桶创建完毕之后，我们需要配置 Bucket，主要是添加自定义域名和创建令牌。前者用来公共访问我们 Bucket 中的文件，后者用来帮助我们上传到 Bucket。</p>
-<p>配置自定义域名：设置 -&gt; 公开访问 -&gt; 连接域</p>
-<p><img src="https://img.jacksonwang28.top/2024/06/2e8d901c72db8e2c86924dfeea28bdcb.png" alt=""></p>
-<p><img src="https://img.jacksonwang28.top/2024/06/cf6abf7713d9dcb04535dfbdefdaf54e.png" alt=""></p>
-<p>这里有 3 点要讲的：</p>
-<ul>
-<li>自定义是用来公开访问我们的桶的</li>
-<li>我们可以购买域名，然后在 Cloudflare 中注册管理</li>
-<li>注册管理域名之后，可以在域中添加已经注册的域或子域</li>
-</ul>
-<p><em>至于如何购买域名，在 CloudFlare 中注册可以 google it，或许我后面会出一期教程</em></p>
-<p>创建令牌：管理令牌 -&gt; 创建令牌</p>
-<p><img src="https://img.jacksonwang28.top/2024/06/fc7545157f24d288c12ef5692699ebf4.png" alt=""></p>
-<p><img src="https://img.jacksonwang28.top/2024/06/9ace4aab9389a9f72eae1bf0e29a68a2.png" alt=""></p>
-<p><img src="https://img.jacksonwang28.top/2024/06/979c555739fffa1262bd09f0471ff1c4.png" alt=""></p>
-<p>至此，令牌创建完毕，不要急着关闭此页面。</p>
-<h1 id="配置-picgo">配置 PicGo</h1>
-<p>PicGo 工具主要是用来帮助我们将图片上传到 R2 中。</p>
-<p>首先安装上插件 S3。</p>
-<p><img src="https://img.jacksonwang28.top/2024/06/902490696ab8dc359f92079522118f73.png" alt=""></p>
-<p><img src="https://img.jacksonwang28.top/2024/06/de2b251817590116a3d883a9d0876c6c.png" alt=""></p>
+<p>学习 WiFi 需要一些基础无线通信理论。<br>
+<img src="https://img.jacksonwang28.top/2024/06/14b3606032cb762104032bbfb6f75b50.png" alt=""></p>
+<h1 id="射频信号">射频信号</h1>
+<p>发射机产生的交流电信号为射频信号。</p>
+<h2 id="射频信号的特性">射频信号的特性</h2>
+<p>波长频率振幅这里就不过多讲述了。<br>
+相位并不是单一射频信号的特性，其是一个<strong>相对</strong>概念，描述的是两个信号之间的关系。这和我们的月相是类似的。<strong>相位对理解多径 multipath 至关重要</strong>。</p>
+<h2 id="射频信号的行为">射频信号的行为</h2>
+<p>射频信号在空气中传播千变万化，射频的传播行为有以下几种关键的行为：吸收、反射、散射、折射、衍射、衰减、自由空间路径损耗、多径、增益。下面重点讲几种<br></p>
+<h3 id="衰减">衰减</h3>
+<p>信号在空间中传输，受吸收、距离和多径的影响而衰减。</p>
+<h3 id="自由空间路径损耗">自由空间路径损耗</h3>
+<p>即使没有障碍吸收和多径的影响，电磁信号在传输中也会受物理定律而衰弱。射频信号在离开天线之后，能量会扩散到更大的区域，导致信号强度减弱。<br>
+这里讲一下 6dB 规则，即距离每增加 1 倍，振幅将减少 6dB。如图中 2000 到 4000，增加 1 倍之后，振幅减少 6dB。<br>
+<img src="https://img.jacksonwang28.top/2024/06/e503ef0b04a58dba1947b6602f0c6fb3.png" alt=""><br>`</p>
+<h3 id="多径">多径</h3>
+<p>由于信号会发生反射、散射、折射或衍射，导致同一信号沿多条路径传输，同时或相隔极短的时间到达接收天线。<br>
+<img src="https://img.jacksonwang28.top/2024/06/3b0bac646faef2045c408753b7248cc6.png" alt=""><br>
+由于反射信号路径更长，因此一般晚于主信号到达天线，多条路径之间的时间差称为时延扩展 delay spread。<br>
+多径造成遗留的 802.11a/b/g 无线网络性能下降，因为多径会降低接收信号的强度和质量。<br>
+但是，802.11n/ac 无线接口采用 MIMO 天线分集与 MRC 信号处理技术，使多径转变为提升网络性能的有利条件。<br></p>
+<p><a href="https://wirelesspi.com/carrier-phase-based-ranging-in-indoor-multipath-channels/">https://wirelesspi.com/carrier-phase-based-ranging-in-indoor-multipath-channels/</a></p>
+<h3 id="增益">增益</h3>
+<p>增益又称为放大，描述振幅或信号强度的增加。<br>
+增益分为有源增益和无源增益，收发器 transceiver 产生有源增益，收发器和天线之间使用放大器也会产生有源增益；使用天线聚焦射频信号产生无缘增益，如下图。<br>
+<img src="https://img.jacksonwang28.top/2024/06/6a4be86a98cfbf4c24a96a3cedad5b2a.png" alt=""></p>
 
 </main>
 <hr/>
