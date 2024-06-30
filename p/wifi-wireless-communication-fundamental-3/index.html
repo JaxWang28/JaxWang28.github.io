@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>WiFi | Jackson Blog</title>
+    <title>无线通信理论基础（三） | Jackson Blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
@@ -58,34 +58,55 @@
     <hr/>
     </nav>
 
+<div class="article-meta">
+<h1><span class="title">无线通信理论基础（三）</span></h1>
 
+<h2 class="date">
+ 2024/06/29 
+&nbsp
+<span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>次阅读量</span>
+</h2>
+</div>
 
-<h1>WiFi</h1>
+<main>
+<h1 id="天线类型">天线类型</h1>
+<p>天线不仅可以作为辐射器聚焦发射信号能量，还可以聚焦接收信号能量。<br></p>
+<h2 id="全向天线">全向天线</h2>
+<p>omnidirectional antenna<br>
+<img src="https://img.jacksonwang28.top/2024/06/8d67a716318a0407ad4e64bbccff2bf1.png" alt=""></p>
+<h2 id="半定向天线">半定向天线</h2>
+<p>semidirectional antenna<br></p>
+<h2 id="强方向性天线">强方向性天线</h2>
+<p>highly directional antenna<br>
+<img src="https://img.jacksonwang28.top/2024/06/2ab3b010ce0c5ac82c7f77835711222c.png" alt=""></p>
+<h1 id="天线分集">天线分集</h1>
+<p>室内无线网络容易产生多径信号，为了补偿多径带来的影响，接入点等无线网络设备普遍采用天线分集 antenna diversity，又称为 spatial diversity，接入点使用两副或多副天线，并与接收机共同工作，以最大限度减少多径的不利影响。<br>
+<img src="https://img.jacksonwang28.top/2024/06/2477ab1897b0bffc445f4c20a0348d09.png" alt="">
+接入点侦听到射频信号时，比较两副天线收到的信号，选择信号强的那副天线来接收数据帧。<br>
+802.11n 之前的接口大多采用交换分集 switched diversity ，选择振幅最大的信号，忽略其他信号。<br></p>
+<h1 id="多输入输出">多输入输出</h1>
+<p>多输入多输出 MIMO 是一种更为复杂的<strong>天线分集</strong>技术。<br>
+多径会影响信号质量，因此传统的天线系统致力于消除多径带来的不利影响；而 MIMO 恰恰相反，它利用多径来改善信号质量，MIMO 使用多副天线同时收发数据，发射机能同时使用多个射频信号发射数据，接收机再将这些数据从信号中恢复。<br>
+802.11n/ac 无线接口使用 MIMO。</p>
 
+</main>
+<hr/>
 
-
-
-<ul>
-  
-  
-  
-  <li>
-    <span class="date">2024/06/29</span>
-    <a href="/p/wifi-wireless-communication-fundamental-3/">无线通信理论基础（三）</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/06/20</span>
-    <a href="/p/wifi-wireless-communication-fundamental-2/">无线通信理论基础（二）</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/06/19</span>
-    <a href="/p/wifi-wireless-communication-fundamental-1/">无线通信基础原理（一）</a>
-  </li>
-  
-</ul>
-
+<script src="https://giscus.app/client.js"
+        data-repo="JaxWang28/Blog"
+        data-repo-id="R_kgDOIbrexg"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOIbrexs4CSjN8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
   <footer>
   <hr/>
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
