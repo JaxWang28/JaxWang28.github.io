@@ -23,7 +23,7 @@
       <description>射频组件 Transmitter&#xA;发射机，用来产生特定频率的信号。&#xA;Antenna&#xA;在通信系统中，与发射机相连的天线用来辐射信号，与接收机相连的天线用来捕捉信号。&#xA;可以通过两种方式增加天线的功率输出，一种是增加发射机的功率，另一种是引导或聚焦天线辐射出去的射频信号。&#xA;Receiver&#xA;接收机，用来接收信号。&#xA;发射机和接收机通常是一个设备，称为收发器 transceiver&#xA;功率单位与比较单位 功率单位无需多言，就是描述功率的；比较单位是用来描述变化的，生活中最常见的比较单位（折扣），即 1 折，表示是原来的十分之一。&#xA;常见的功率单位：&#xA;瓦特(W) 毫瓦(mW) 毫瓦分贝(dBm) 常见的比价单位：&#xA;分贝(dB) 各向同性分贝(dBi) 偶极子分贝(dBd) 分贝 一个比较单位，来自贝尔实验室，他们功率之比为 10:1 的声音信号称为 1 贝尔 Bell。100:1 为 2 贝尔，依次类推。&#xA;10 lg10=1 100 lg100=2 假设两功率 P1 与 P2&#xA;1 B = 10 dB P1 与 P2 的变化值为: lg(P1/P2) B = 10 lg(P1/P2) dB 假设一个信号衰减 20 dB，计算其衰减倍数:&#xA;10 lg(P1/P2) = 20 P1/P2 = 100 毫瓦分贝 毫瓦分贝指的是相对 1 mW 的分贝。</description>
     </item>
     <item>
-      <title>无线通信基础原理（一）</title>
+      <title>无线通信理论基础（一）</title>
       <link>https://blog.jaxwang.top/p/wifi-wireless-communication-fundamental-1/</link>
       <pubDate>Wed, 19 Jun 2024 23:29:42 +0800</pubDate>
       <guid>https://blog.jaxwang.top/p/wifi-wireless-communication-fundamental-1/</guid>
