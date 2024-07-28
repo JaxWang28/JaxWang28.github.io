@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OpenWRT ubus 框架 | Jackson Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+
+
+  
+    
+      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '7S26TLKGMX');
+        }
+      </script>
+    
+  
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/post/">Posts</a></li>
+      
+      <li><a href="/">About</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/">RSS</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">OpenWRT ubus 框架</span></h1>
+
+<h2 class="date">
+ 2024/07/28 
+&nbsp
+<span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>次阅读量</span>
+</h2>
+</div>
+
+<main>
+<p><a href="https://openwrt.org/docs/techref/ubus">https://openwrt.org/docs/techref/ubus</a><br>
+<a href="https://hackmd.io/@rYMqzC-9Rxy0Isn3zClURg/H1BY98bRw">https://hackmd.io/@rYMqzC-9Rxy0Isn3zClURg/H1BY98bRw</a><br></p>
+<p>一直在使用 ubus，系统性学习一下，并准备用 rust 重构一把。</p>
+<h1 id="ubus-概述">ubus 概述</h1>
+<p>ubus 是一个 OpenWRT 中的 RPC 工具，其主要目的就是提供系统级进程间通信。<br>
+其核心是 ubusd daemon，提供接口给任何其他 daemon 程序进行注册或发送信息。该接口使用 unix socket 实现，并使用 TLV 格式消息。<br>
+ubus 提供了 3 种工具：</p>
+<ul>
+<li>libubus</li>
+<li>command-line tool ubus</li>
+<li>ubus lua module</li>
+</ul>
+<h1 id="ubus-通信模型">ubus 通信模型</h1>
+<p>先看一下我们常见的 client-server 模型。<br>
+<img src="https://img.jacksonwang28.top/2024/07/c22c0e7464b519259d48e4ebc919159c.png" alt=""></p>
+<p>假设有 n 个程序，那么进程间通信的总 IPC 连接数将达到 n 的累加，这是非常惊人的数量。<br></p>
+<p>使用 ubus IPC 模型。<br>
+<img src="https://img.jacksonwang28.top/2024/07/337b7ddfd0334542f502db331c62f034.png" alt=""></p>
+<p><strong>ubus daemon</strong>：作为代理人，负责转发注册。<br>
+<strong>ubus server object</strong>：一些软件或守护进程提供接口，供其他软件调用。Server object 以及其注册的方法可以被 client 调用。<br>
+<strong>ubus client object</strong>：调用者。<br></p>
+<h1 id="ubus-工作模式">ubus 工作模式</h1>
+<h2 id="invoke">Invoke</h2>
+<p>一对一的通信模式。
+<img src="https://img.jacksonwang28.top/2024/07/7f0b542ed8e100a5d92fe23e8849761f.png" alt=""></p>
+<p><img src="https://img.jacksonwang28.top/2024/07/a9062b48edd65822cecef2a0950fb7ab.png" alt=""></p>
+<h2 id="subscribenotify">Subscribe/notify</h2>
+<p>一对多的通信模式，以 object 进行分组。<br>
+<img src="https://img.jacksonwang28.top/2024/07/b3b08c141488348f69b93a602dd9a366.png" alt=""></p>
+<p><img src="https://img.jacksonwang28.top/2024/07/698a0d6cab87565293109af0c0863268.png" alt=""></p>
+<h2 id="event-boardcast">Event Boardcast</h2>
+<p>多对多的通信模式，通过 event 进行分组。<br>
+<img src="https://img.jacksonwang28.top/2024/07/541d43cc5eaa8755644da527fd7a9511.png" alt=""></p>
+<p><img src="https://img.jacksonwang28.top/2024/07/82fc6a4e965763f04175404adbd87d54.png" alt=""></p>
+
+</main>
+<hr/>
+
+<script src="https://giscus.app/client.js"
+        data-repo="JaxWang28/Blog"
+        data-repo-id="R_kgDOIbrexg"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOIbrexs4CSjN8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+  <footer>
+  <hr/>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+
+<div class="busuanzi-footer">
+  <span id="busuanzi_container_site_pv">
+    总访问量 <span id="busuanzi_value_site_pv"></span> 次
+  </span>
+  <span id="busuanzi_container_site_uv">
+    访客数 <span id="busuanzi_value_site_uv"></span> 人次
+  </span>
+</div>
+  
+  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2017 &ndash; 2024 | <a href="https://github.com/jaxwang28">Github</a>
+  
+  </footer>
+  </body>
+</html>
+
