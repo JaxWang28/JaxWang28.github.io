@@ -9,7 +9,7 @@
     <lastBuildDate>Sun, 28 Jul 2024 11:29:49 +0800</lastBuildDate>
     <atom:link href="https://blog.jaxwang.top/tags/rust/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>OpenWRT Rust Package 构建</title>
+      <title>OpenWRT 构建 Rust Package</title>
       <link>https://blog.jaxwang.top/p/openwrt_rust_package/</link>
       <pubDate>Sun, 28 Jul 2024 11:29:49 +0800</pubDate>
       <guid>https://blog.jaxwang.top/p/openwrt_rust_package/</guid>
