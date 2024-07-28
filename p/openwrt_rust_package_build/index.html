@@ -96,6 +96,16 @@ make distclean
 <pre><code>make menuconfig
 勾选 Languages-&gt;rust
 </code></pre>
+<ol start="5">
+<li>编译交叉工具链</li>
+</ol>
+<pre><code>make toolchain/install
+</code></pre>
+<ol start="6">
+<li>调整 PATH 环境变量 目标无关工具和工具链被部署到 <code>staging_dir/host/</code> 和 <code>staging_dir/toolchain/</code> 目录。<code>staging_dir/host/bin</code> 可以找到相关的可执行文件。我们将其添加到 PATH 环境变量中方便我们直接使用。</li>
+</ol>
+<pre><code>export PATH=/home/buildbot/source/staging_dir/host/bin:$PATH
+</code></pre>
 <h1 id="源码准备">源码准备</h1>
 <ol>
 <li>在 openwrt 的源码目录下执行</li>
