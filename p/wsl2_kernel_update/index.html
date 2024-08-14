@@ -68,9 +68,9 @@
 </div>
 
 <main>
-<p>! Warning
-If you have multiple distros installed, they will all use the same kernel.
-WSL2 中不同发行版使用的是同一个内核。</p>
+<p><strong>! Warning</strong><br>
+If you have multiple distros installed, they will all use the same kernel.<br>
+WSL2 中不同发行版使用的是同一个内核。<br></p>
 <h1 id="0x01-准备">0x01 准备</h1>
 <ol>
 <li>源码</li>
@@ -99,7 +99,6 @@ git checkout linux-msft-wsl-6.6.36.3
 <h1 id="0x03-安装">0x03 安装</h1>
 <pre><code>sudo make modules_install headers_install
 </code></pre>
-<p>\</p>
 <pre><code>cp arch/x86/boot/bzImage /mnt/c/User/&lt;username&gt;/bzImage
 </code></pre>
 <p>创建 <code>%USERPROFILE%\.wslconfig</code> 并添加下面内容</p>
