@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-	<meta name="generator" content="Hugo 0.132.1">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Home | Jackson Blog</title>
+    <title>WSL2 Kernel 升级更换 | Jackson Blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     
@@ -58,87 +57,81 @@
     <hr/>
     </nav>
 
+<div class="article-meta">
+<h1><span class="title">WSL2 Kernel 升级更换</span></h1>
 
+<h2 class="date">
+ 2024/08/14 
+&nbsp
+<span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>次阅读量</span>
+</h2>
+</div>
 
+<main>
+<p>! Warning
+If you have multiple distros installed, they will all use the same kernel.
+WSL2 中不同发行版使用的是同一个内核。</p>
+<h1 id="0x01-准备">0x01 准备</h1>
+<ol>
+<li>源码</li>
+</ol>
+<pre><code>git clone https://github.com/microsoft/WSL2-Linux-Kernel.git
+</code></pre>
+<ol start="2">
+<li>toolchain</li>
+</ol>
+<pre><code>sudo apt update &amp;&amp; sudo apt install build-essential flex bison libssl-dev libelf-dev bc python3 pahole
+</code></pre>
+<ol start="3">
+<li>查看源码分支选择版本</li>
+</ol>
+<pre><code># 查看所有版本
+git tag 
 
-<p><a href="https://github.com/jaxwang28"><img src="https://simpleicons.org/icons/github.svg" style="max-width:15%;min-width:40px;float:right;" alt="Github repo" /></a></p>
-<h1 id="jacksons-blog">Jackson&rsquo;s Blog</h1>
-<p><strong>You know some birds are not meant to be caged, their feathers are just too bright.</strong><br>
-—The Shawshank Redemption.</p>
-<p>All pages not under the root directory of the website are listed below. You can also visit the list page of a single section, e.g., <a href="/post/">posts</a>, or <a href="/note/">notes</a>.</p>
+# 选择目前最新版本
+git checkout linux-msft-wsl-6.6.36.3
+</code></pre>
+<h1 id="0x02-构建">0x02 构建</h1>
+<pre><code>make menuconfig KCONFIG_CONFIG=Microsoft/config-wsl
+</code></pre>
+<pre><code>make -j$(nproc) KCONFIG_CONFIG=Microsoft/config-wsl
+</code></pre>
+<h1 id="0x03-安装">0x03 安装</h1>
+<pre><code>sudo make modules_install headers_install
+</code></pre>
+<p>\</p>
+<pre><code>cp arch/x86/boot/bzImage /mnt/c/User/&lt;username&gt;/bzImage
+</code></pre>
+<p>创建 <code>%USERPROFILE%\.wslconfig</code> 并添加下面内容</p>
+<pre><code>[wsl2]
+kernel=C:\\User\\&lt;username&gt;\\bzImage
+</code></pre>
+<h1 id="0x04-检验">0x04 检验</h1>
+<pre><code>wsl --shutdown
+</code></pre>
+<pre><code>uname -r
+</code></pre>
+<h1 id="0x05-参考">0x05 参考</h1>
+<p><a href="https://learn.microsoft.com/en-us/community/content/wsl-user-msft-kernel-v6">https://learn.microsoft.com/en-us/community/content/wsl-user-msft-kernel-v6</a></p>
 
+</main>
+<hr/>
 
-<ul>
-  
-  
-  
-  <li>
-    <span class="date">2024/08/14</span>
-    <a href="/p/wsl2_kernel_update/">WSL2 Kernel 升级更换</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/07/28</span>
-    <a href="/p/openwrt_ubus/">OpenWRT ubus 框架</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/07/28</span>
-    <a href="/p/openwrt_rust_package_build/">OpenWRT 构建 Rust Package</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/07/27</span>
-    <a href="/p/openwrt_new_package_build/">OpenWRT 构建个人 Package</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/06/30</span>
-    <a href="/p/wifi-wireless-communication-fundamental-4/">无线通信理论基础（四）</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/06/29</span>
-    <a href="/p/wifi-wireless-communication-fundamental-3/">无线通信理论基础（三）</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/06/20</span>
-    <a href="/p/wifi-wireless-communication-fundamental-2/">无线通信理论基础（二）</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/06/19</span>
-    <a href="/p/wifi-wireless-communication-fundamental-1/">无线通信理论基础（一）</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/06/18</span>
-    <a href="/p/hugo-slug-seo/">hugo slug 与 SEO</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/06/16</span>
-    <a href="/p/githugpages-custom-domain/">Github Pages 自定义域名</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/06/16</span>
-    <a href="/p/namesilo-transfer-cloudflare/">Namesilo 域名解析到 CloudFlare</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/06/15</span>
-    <a href="/p/cloudflare-r2-image/">使用 CloudFlare R2 搭建图床</a>
-  </li>
-  
-  <li>
-    <span class="date">0001/01/01</span>
-    <a href="/p/"></a>
-  </li>
-  
-</ul>
-
+<script src="https://giscus.app/client.js"
+        data-repo="JaxWang28/Blog"
+        data-repo-id="R_kgDOIbrexg"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOIbrexs4CSjN8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
   <footer>
   <hr/>
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">

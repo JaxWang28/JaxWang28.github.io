@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Linux on Jackson Blog</title>
+    <link>https://blog.jaxwang.top/tags/linux/</link>
+    <description>Recent content in Linux on Jackson Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 14 Aug 2024 11:04:51 +0800</lastBuildDate>
+    <atom:link href="https://blog.jaxwang.top/tags/linux/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>WSL2 Kernel 升级更换</title>
+      <link>https://blog.jaxwang.top/p/wsl2_kernel_update/</link>
+      <pubDate>Wed, 14 Aug 2024 11:04:51 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/p/wsl2_kernel_update/</guid>
+      <description>! Warning If you have multiple distros installed, they will all use the same kernel. WSL2 中不同发行版使用的是同一个内核。&#xA;0x01 准备 源码 git clone https://github.com/microsoft/WSL2-Linux-Kernel.git toolchain sudo apt update &amp;amp;&amp;amp; sudo apt install build-essential flex bison libssl-dev libelf-dev bc python3 pahole 查看源码分支选择版本 # 查看所有版本 git tag # 选择目前最新版本 git checkout linux-msft-wsl-6.6.36.3 0x02 构建 make menuconfig KCONFIG_CONFIG=Microsoft/config-wsl make -j$(nproc) KCONFIG_CONFIG=Microsoft/config-wsl 0x03 安装 sudo make modules_install headers_install \&#xA;cp arch/x86/boot/bzImage /mnt/c/User/&amp;lt;username&amp;gt;/bzImage 创建 %USERPROFILE%\.wslconfig 并添加下面内容</description>
+    </item>
+  </channel>
+</rss>
