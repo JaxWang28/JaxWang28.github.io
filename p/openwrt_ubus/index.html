@@ -13,8 +13,6 @@
 <link rel="manifest" href="/favicon/site.webmanifest">
 
 
-  
-    
       <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
       <script>
         var doNotTrack = false;
@@ -29,10 +27,6 @@
           gtag('config', '7S26TLKGMX');
         }
       </script>
-    
-  
-
-
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
   <meta name="referrer" content="no-referrer-when-downgrade">
   </head>
@@ -82,26 +76,26 @@ ubus 提供了 3 种工具：</p>
 </ul>
 <h1 id="ubus-通信模型">ubus 通信模型</h1>
 <p>先看一下我们常见的 client-server 模型。<br>
-<img src="https://img.jacksonwang28.top/2024/07/c22c0e7464b519259d48e4ebc919159c.png" alt=""></p>
+<img src="https://img.jaxwang.top/2024/07/c22c0e7464b519259d48e4ebc919159c.png" alt=""></p>
 <p>假设有 n 个程序，那么进程间通信的总 IPC 连接数将达到 n 的累加，这是非常惊人的数量。<br></p>
 <p>使用 ubus IPC 模型。<br>
-<img src="https://img.jacksonwang28.top/2024/07/337b7ddfd0334542f502db331c62f034.png" alt=""></p>
+<img src="https://img.jaxwang.top/2024/07/337b7ddfd0334542f502db331c62f034.png" alt=""></p>
 <p><strong>ubus daemon</strong>：作为代理人，负责转发注册。<br>
 <strong>ubus server object</strong>：一些软件或守护进程提供接口，供其他软件调用。Server object 以及其注册的方法可以被 client 调用。<br>
 <strong>ubus client object</strong>：调用者。<br></p>
 <h1 id="ubus-工作模式">ubus 工作模式</h1>
 <h2 id="invoke">Invoke</h2>
 <p>一对一的通信模式。
-<img src="https://img.jacksonwang28.top/2024/07/7f0b542ed8e100a5d92fe23e8849761f.png" alt=""></p>
-<p><img src="https://img.jacksonwang28.top/2024/07/a9062b48edd65822cecef2a0950fb7ab.png" alt=""></p>
+<img src="https://img.jaxwang.top/2024/07/7f0b542ed8e100a5d92fe23e8849761f.png" alt=""></p>
+<p><img src="https://img.jaxwang.top/2024/07/a9062b48edd65822cecef2a0950fb7ab.png" alt=""></p>
 <h2 id="subscribenotify">Subscribe/notify</h2>
 <p>一对多的通信模式，以 object 进行分组。<br>
-<img src="https://img.jacksonwang28.top/2024/07/b3b08c141488348f69b93a602dd9a366.png" alt=""></p>
-<p><img src="https://img.jacksonwang28.top/2024/07/698a0d6cab87565293109af0c0863268.png" alt=""></p>
+<img src="https://img.jaxwang.top/2024/07/b3b08c141488348f69b93a602dd9a366.png" alt=""></p>
+<p><img src="https://img.jaxwang.top/2024/07/698a0d6cab87565293109af0c0863268.png" alt=""></p>
 <h2 id="event-boardcast">Event Boardcast</h2>
 <p>多对多的通信模式，通过 event 进行分组。<br>
-<img src="https://img.jacksonwang28.top/2024/07/541d43cc5eaa8755644da527fd7a9511.png" alt=""></p>
-<p><img src="https://img.jacksonwang28.top/2024/07/82fc6a4e965763f04175404adbd87d54.png" alt=""></p>
+<img src="https://img.jaxwang.top/2024/07/541d43cc5eaa8755644da527fd7a9511.png" alt=""></p>
+<p><img src="https://img.jaxwang.top/2024/07/82fc6a4e965763f04175404adbd87d54.png" alt=""></p>
 
 </main>
 <hr/>
