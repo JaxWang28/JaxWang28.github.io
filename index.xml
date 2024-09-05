@@ -6,8 +6,15 @@
     <description>Recent content in Home on Jackson Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Wed, 14 Aug 2024 11:04:51 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 05 Sep 2024 23:53:25 +0800</lastBuildDate>
     <atom:link href="https://blog.jaxwang.top/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>EAP-Extensible Authentication Protocol</title>
+      <link>https://blog.jaxwang.top/p/extensible_authentication_rotocol/</link>
+      <pubDate>Thu, 05 Sep 2024 23:53:25 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/p/extensible_authentication_rotocol/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://datatracker.ietf.org/doc/html/rfc3748&#34;&gt;https://datatracker.ietf.org/doc/html/rfc3748&lt;/a&gt;&lt;br&gt;&#xA;Extensible Authentication Protocol 可扩展身份验证协议&lt;/p&gt;&#xA;&lt;p&gt;EAP 被设计用来在网络中进行身份验证，但其不适用于 IP 层。&#xA;EAP 是一种&lt;strong&gt;框架协议&lt;/strong&gt;，其本身并未规定如何进行身份验证，但其允许设计人员打造自己的 EAP 身份验证方式 EAP method。其在设计上能够运行于任何&lt;strong&gt;链路层&lt;/strong&gt;，但其不适用于 IP 层。&lt;/p&gt;&#xA;&lt;pre&gt;&lt;code&gt; +-+-+-+-+-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+-+-+-+-+&#xA; |           |           |  |           |           |&#xA; | EAP method| EAP method|  | EAP method| EAP method|&#xA; | Type = X  | Type = Y  |  | Type = X  | Type = Y  |&#xA; |       V   |           |  |       ^   |           |&#xA; +-+-+-+-!-+-+-+-+-+-+-+-+  +-+-+-+-!-+-+-+-+-+-+-+-+&#xA; |       !               |  |       !               |&#xA; |  EAP  ! Peer layer    |  |  EAP  ! Auth. layer   |&#xA; |       !               |  |       !               |&#xA; +-+-+-+-!-+-+-+-+-+-+-+-+  +-+-+-+-!-+-+-+-+-+-+-+-+&#xA; |       !               |  |       !               |&#xA; |  EAP  ! layer         |  |  EAP  ! layer         |&#xA; |       !               |  |       !               |&#xA; +-+-+-+-!-+-+-+-+-+-+-+-+  +-+-+-+-!-+-+-+-+-+-+-+-+&#xA; |       !               |  |       !               |&#xA; | Lower ! layer         |  | Lower ! layer         |&#xA; |       !               |  |       !               |&#xA; +-+-+-+-!-+-+-+-+-+-+-+-+  +-+-+-+-!-+-+-+-+-+-+-+-+&#xA;&#x9;&#x9; !                          !&#xA;&#x9;&#x9; !   Peer                   ! Authenticator&#xA;&#x9;&#x9; +------------&amp;gt;-------------+&#xA;&lt;/code&gt;&lt;/pr</description>
+    </item>
     <item>
       <title>WSL2 Kernel 升级更换</title>
       <link>https://blog.jaxwang.top/p/wsl2_kernel_update/</link>
@@ -91,6 +98,13 @@
       <pubDate>Sat, 15 Jun 2024 10:02:46 +0800</pubDate>
       <guid>https://blog.jaxwang.top/p/cloudflare-r2-image/</guid>
       <description>&lt;h1 id=&#34;为什么选择-cloudflare-r2&#34;&gt;为什么选择 Cloudflare R2&lt;/h1&gt;&#xA;&lt;p&gt;白嫖！白嫖！还是 TMD 白嫖！&lt;/p&gt;&#xA;&lt;p&gt;R2 计费基于存储的数据总量及对数据执行的两类操作。无需支付任何出口费用。免费额度对于我们个人用户完全够用。&lt;em&gt;(不被盗刷的情下)&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2024/06/336ed2df579dd1a99322b4d4b748978d.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h1 id=&#34;创建-bucket&#34;&gt;创建 Bucket&lt;/h1&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2024/06/f0c424e0420f8dbe2b1ae5c73fab0c94.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2024/06/e277b0bd1504f73ac73a2697b078b0c8.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h1 id=&#34;配置-bucket&#34;&gt;配置 Bucket&lt;/h1&gt;&#xA;&lt;p&gt;桶创建完毕之后，我们需要配置 Bucket，主要是添加自定义域名和创建令牌。前者用来公共访问我们 Bucket 中的文件，后者用来帮助我们上传到 Bucket。&lt;/p&gt;&#xA;&lt;p&gt;配置自定义域名：设置 -&amp;gt; 公开访问 -&amp;gt; 连接域&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2024/06/2e8d901c72db8e2c86924dfeea28bdcb.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2024/06/cf6abf7713d9dcb04535dfbdefdaf54e.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;这里有 3 点要讲的：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;自定义是用来公开访问我们的桶的&lt;/li&gt;&#xA;&lt;li&gt;我们可以购买域名，然后在 Cloudflare 中注册管理&lt;/li&gt;&#xA;&lt;li&gt;注册管理域名之后，可以在域中添加已经注册的域或子域&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;&lt;em&gt;至于如何购买域名，在 CloudFlare 中注册可以 google it，或许我后面会出一期教程&lt;/em&gt;&lt;/p&gt;&#xA;&lt;p&gt;创建令牌：管理令牌 -&amp;gt; 创建令牌&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2024/06/fc7545157f24d288c12ef5692699ebf4.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title></title>
+      <link>https://blog.jaxwang.top/p/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>https://blog.jaxwang.top/p/</guid>
+      <description>&lt;p&gt;hostapd - user space daemon for access points, including, e.g., IEEE 802.1X/WPA/EAP Authenticator for number of Linux and BSD drivers, RADIUS client, integrated EAP server, and RADIUS authentication server.&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://w1.fi/&#34;&gt;https://w1.fi/&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title></title>
