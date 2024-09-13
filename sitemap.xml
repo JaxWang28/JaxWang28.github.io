@@ -2,13 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://blog.jaxwang.top/p/extensible_authentication_rotocol/</loc>
-    <lastmod>2024-09-05T23:53:25+08:00</lastmod>
+    <loc>https://blog.jaxwang.top/p/ieee80211_automatic_channel_selection/</loc>
+    <lastmod>2024-09-13T22:13:36+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/</loc>
-    <lastmod>2024-09-05T23:53:25+08:00</lastmod>
+    <lastmod>2024-09-13T22:13:36+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/post/</loc>
+    <lastmod>2024-09-13T22:13:36+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/p/extensible_authentication_rotocol/</loc>
     <lastmod>2024-09-05T23:53:25+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/kernel/</loc>
