@@ -62,8 +62,8 @@
 </div>
 
 <main>
-<p><a href="https://datatracker.ietf.org/doc/html/rfc3748">https://datatracker.ietf.org/doc/html/rfc3748</a><br>
-Extensible Authentication Protocol 可扩展身份验证协议</p>
+<h1 id="0x00-eap-框架协议">0x00 EAP 框架协议</h1>
+<p>Extensible Authentication Protocol 可扩展身份验证协议</p>
 <p>EAP 被设计用来在网络中进行身份验证，但其不适用于 IP 层。
 EAP 是一种<strong>框架协议</strong>，其本身并未规定如何进行身份验证，但其允许设计人员打造自己的 EAP 身份验证方式 EAP method。其在设计上能够运行于任何<strong>链路层</strong>，但其不适用于 IP 层。</p>
 <pre><code> +-+-+-+-+-+-+-+-+-+-+-+-+  +-+-+-+-+-+-+-+-+-+-+-+-+
@@ -84,11 +84,11 @@ EAP 是一种<strong>框架协议</strong>，其本身并未规定如何进行�
  | Lower ! layer         |  | Lower ! layer         |
  |       !               |  |       !               |
  +-+-+-+-!-+-+-+-+-+-+-+-+  +-+-+-+-!-+-+-+-+-+-+-+-+
-		 !                          !
-		 !   Peer                   ! Authenticator
-		 +------------&gt;-------------+
+         !                          !
+         !   Peer                   ! Authenticator
+         +------------&gt;-------------+
 </code></pre>
-<p>帧格式</p>
+<h1 id="0x01-封包格式">0x01 封包格式</h1>
 <pre><code> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -97,6 +97,58 @@ EAP 是一种<strong>框架协议</strong>，其本身并未规定如何进行�
 |    Data ...
 +-+-+-+-+
 </code></pre>
+<p>Code</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">1</th>
+          <th style="text-align: left">Request</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left">2</td>
+          <td style="text-align: left">Response</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">3</td>
+          <td style="text-align: left">Success</td>
+      </tr>
+      <tr>
+          <td style="text-align: left">4</td>
+          <td style="text-align: left">Failure</td>
+      </tr>
+  </tbody>
+</table>
+<p>Identifier
+标识符，重传时使用相同的标识符</p>
+<p>Length
+EAP 总长度，包括 code Identifier Length Data</p>
+<p>Data</p>
+<h1 id="0x03-请求与响应">0x03 请求与响应</h1>
+<pre><code> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Code      |  Identifier   |            Length             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|     Type      |  Type-Data ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+</code></pre>
+<p>Type
+This field indicates the Type of Request or Response.</p>
+<p>Type-Data
+The Type-Data field varies with the Type of Request and the associated Response.</p>
+<p>Initial EAP Request/Response Types
+1       Identity
+2       Notification
+3       Nak (Response only)
+4       MD5-Challenge
+5       One Time Password (OTP)
+6       Generic Token Card (GTC)
+254       Expanded Types
+255       Experimental use</p>
+<h1 id="0xff-参考文献">0xFF 参考文献</h1>
+<p><a href="https://datatracker.ietf.org/doc/html/rfc3748">https://datatracker.ietf.org/doc/html/rfc3748</a></p>
 
 </main>
 <hr/>
