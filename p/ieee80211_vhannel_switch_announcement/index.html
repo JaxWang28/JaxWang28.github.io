@@ -65,7 +65,6 @@
 <h1 id="0x01-简介">0x01 简介</h1>
 <p>为了保持更好的连续性，AP 应该在其将要更换 Channel 时，通知连接在其上面的 Stas。</p>
 <h1 id="0x02-实现">0x02 实现</h1>
-<p>通过在 <strong>Beacon 帧</strong> 和 <strong>Probe Response 帧</strong> 中添加 <strong>Channel Switch Announcement elements</strong> 来实现此功能。</p>
 <pre><code>  AP -------------channel 52------------- Client
   |
   |  will change to ch40
@@ -80,7 +79,8 @@
 
 
 </code></pre>
-<p><img src="https://img.jaxwang.top/2024/09/9cfdc5379d31491d23d9c99252c49c59.png" alt=""></p>
+<p>通过在 <strong>Beacon 帧</strong> 和 <strong>Probe Response 帧</strong> 中添加 <strong>Channel Switch Announcement elements</strong> 来实现此功能。
+<img src="https://img.jaxwang.top/2024/09/9cfdc5379d31491d23d9c99252c49c59.png" alt=""></p>
 <center>ACS Element frame</center>
 
 </main>
