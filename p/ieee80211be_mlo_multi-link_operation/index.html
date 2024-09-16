@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>[IEEE80211be] MLO: Multi-Link Aggregation Operation | Jackson Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '7S26TLKGMX');
+        }
+      </script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/post/">Posts</a></li>
+      
+      <li><a href="/">About</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/">RSS</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">[IEEE80211be] MLO: Multi-Link Aggregation Operation</span></h1>
+
+<h2 class="date">
+ 2024/09/15 
+&nbsp
+<span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>次阅读量</span>
+</h2>
+</div>
+
+<main>
+<h1 id="0x01-what-is-mlo">0x01 What is MLO?</h1>
+<p>在 Wi-Fi6 中，STA 与 AP 之间只在 1 个频段上建立连接（2.4G、5G、6G）。这意味着其他频段没有被使用，这无疑是一种浪费。虽然现有的 Wi-Fi 技术可以在 2.4G 5G 6G 之间切换，但切换带来的延迟可达 100ms 。<br></p>
+<p>IEEE80211be Wi-Fi7 引入 MLO 多链路聚合技术，使 STA 与 AP 可以在多个频段上同时建立连接，改善数据传输。<br></p>
+<p><img src="https://img.jaxwang.top/2024/09/72ffdf6f9a6e7d2fca6f18df793211ca.png" alt=""></p>
+<p>通过在多个频段建立连接，MLO 可以带来<strong>更大的吞吐量、更低的延迟、更好的可靠性。</strong><br></p>
+<h1 id="0x02-mlo-相关概念">0x02 MLO 相关概念</h1>
+<p><img src="https://img.jaxwang.top/2024/09/0ab4ca892433da3b57a775822c26d5c3.png" alt="">
+多链路设备的一个射频单元有至少两个以上的射频链路链接到空口，但对于LLC层仅只有一个MAC地址。相比于单链路设备，在射频链路上增加了冗余。设备根据使用场景与空口状态，进行不同链路的切换与协同，来保障数据能够更高效、更快速、低延迟地进行传输。</p>
+<p><strong>Link</strong>
+代表实际的连接。Link 有自己独立的 MAC 地址。</p>
+<p><strong>MLD</strong>
+Multi-Link Device，支持 MLO Device。<br>
+协议规定MLD的mac可以跟两个Link中的一个相同，也可以是另外不同的唯一地址。</p>
+<h1 id="asynchronous-and-synchronous">asynchronous and synchronous</h1>
+<p>同步多链路传输，MLD 在多条 link 上同步传输帧，起始时间对齐。<br>
+异步多链路传输，MLD 在多条 link 上异步传输帧，起始时间不对齐。</p>
+<p><img src="https://img.jaxwang.top/2024/09/a094dc352d15db23469ab8eb358b470e.png" alt=""></p>
+<p><img src="https://img.jaxwang.top/2024/09/fdb1f9b0da76c5e0e671808954a29615.png" alt=""></p>
+<p>采用异步多链路时，每条链路的传输独立，互不影响，<code>STR</code> 工作模式被提出。<br>
+但是当每个 link 所在的 Radio 没有充分隔离时，其中一条 link 的传输势必会对另一条 link 产生干扰，这种干扰为 <code>in-device conxextence(IDC)</code> 干扰。为了解决这个问题，采用同步多链路的 <code>Non-STR(NSTR)</code> 工作模式被提出。</p>
+<h1 id="simultaneous-transmit--receive-str">Simultaneous Transmit &amp; Receive (STR)</h1>
+<p>STR 允许在多条 link 独立工作，link 间互不干扰。当两条 link 分别进行 TX 和 RX 时，便产生了一种全双工的现象。</p>
+<p><img src="https://img.jaxwang.top/2024/09/49847998f28024848cc378c191c9b0d2.png" alt=""></p>
+<p>STR 与 双频双并发 DBDC 的区别？</p>
+<h1 id="non-simultaneous-transmit-and-receive-nstr">Non-Simultaneous Transmit and Receive (NSTR)</h1>
+<p>NSTR 不允许在多条 link 独立工作，在同一时间所有 link 必须同时接收或发送。</p>
+<p><img src="https://img.jaxwang.top/2024/09/ec2c3f8966f9a4c02fdb4f9b59743922.png" alt=""></p>
+<p><em>其他细节？</em></p>
+<h1 id="multi-link-multi-radio-mlmr">Multi-Link Multi-Radio (MLMR)</h1>
+<p>上述两种模式被称为 Multi-Link Multi-Radio 模式，这这种模式下，link 是被静态分配的，而不可以动态切换。<br></p>
+<h1 id="ehanced-multi-link-signal-radio-emlsr">Ehanced Multi-Link Signal-Radio (EMLSR)</h1>
+<h1 id="0xff-参考">0xff 参考</h1>
+<pre><code>https://wlanprofessionals.com/exploring-key-features-of-multi-link-operation-mlo-in-wi-fi-7/
+https://www.tp-link.com/us/blog/1067/what-is-wifi-7-s-multi-link-operation-mlo-/
+
+https://zhuanlan.zhihu.com/p/387761464
+https://www.youtube.com/watch?v=ohexy5VE170&amp;ab_channel=WirelessLANProfessionals
+</code></pre>
+
+</main>
+<hr/>
+
+<script src="https://giscus.app/client.js"
+        data-repo="JaxWang28/Blog"
+        data-repo-id="R_kgDOIbrexg"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOIbrexs4CSjN8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+  <footer>
+  <hr/>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+
+<div class="busuanzi-footer">
+  <span id="busuanzi_container_site_pv">
+    总访问量 <span id="busuanzi_value_site_pv"></span> 次
+  </span>
+  <span id="busuanzi_container_site_uv">
+    访客数 <span id="busuanzi_value_site_uv"></span> 人次
+  </span>
+</div>
+  
+  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2017 &ndash; 2024 | <a href="https://github.com/jaxwang28">Github</a>
+  
+  </footer>
+  </body>
+</html>
+
