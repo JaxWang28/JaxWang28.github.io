@@ -2,13 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://blog.jaxwang.top/p/ieee80211be_mlo_multi-link_operation/</loc>
-    <lastmod>2024-09-15T22:12:02+08:00</lastmod>
-  </url><url>
     <loc>https://blog.jaxwang.top/</loc>
-    <lastmod>2024-09-15T22:12:02+08:00</lastmod>
+    <lastmod>2024-09-16T09:42:07+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/post/</loc>
+    <lastmod>2024-09-16T09:42:07+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/p/wireless_collection/</loc>
+    <lastmod>2024-09-16T09:42:07+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/p/ieee80211be_mlo_multi-link_operation/</loc>
     <lastmod>2024-09-15T22:12:02+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/p/ieee80211_vhannel_switch_announcement/</loc>
@@ -100,8 +103,6 @@
   </url><url>
     <loc>https://blog.jaxwang.top/p/cloudflare-r2-image/</loc>
     <lastmod>2024-06-15T10:02:46+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.jaxwang.top/p/</loc>
   </url><url>
     <loc>https://blog.jaxwang.top/p/</loc>
   </url><url>
