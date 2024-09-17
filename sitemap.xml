@@ -3,21 +3,24 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://blog.jaxwang.top/</loc>
-    <lastmod>2024-09-16T09:42:07+08:00</lastmod>
+    <lastmod>2024-09-17T22:04:00+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/post/</loc>
-    <lastmod>2024-09-16T09:42:07+08:00</lastmod>
+    <lastmod>2024-09-17T22:04:00+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/p/wifi-wireless-communication-fundamental/</loc>
+    <lastmod>2024-09-17T22:04:00+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/p/wireless_collection/</loc>
     <lastmod>2024-09-16T09:42:07+08:00</lastmod>
   </url><url>
-    <loc>https://blog.jaxwang.top/p/ieee80211be_mlo_multi-link_operation/</loc>
+    <loc>https://blog.jaxwang.top/p/ieee80211be-mlo-multi-link-operation/</loc>
     <lastmod>2024-09-15T22:12:02+08:00</lastmod>
   </url><url>
-    <loc>https://blog.jaxwang.top/p/ieee80211_vhannel_switch_announcement/</loc>
+    <loc>https://blog.jaxwang.top/p/ieee80211-vhannel-switch-announcement/</loc>
     <lastmod>2024-09-13T22:31:03+08:00</lastmod>
   </url><url>
-    <loc>https://blog.jaxwang.top/p/ieee80211_automatic_channel_selection/</loc>
+    <loc>https://blog.jaxwang.top/p/ieee80211-automatic-channel-selection/</loc>
     <lastmod>2024-09-13T22:13:36+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/p/extensible_authentication_rotocol/</loc>
