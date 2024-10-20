@@ -3,10 +3,19 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://blog.jaxwang.top/</loc>
-    <lastmod>2024-09-17T22:04:00+08:00</lastmod>
+    <lastmod>2024-10-20T15:23:18+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/p/makefile_note/</loc>
+    <lastmod>2024-10-20T15:23:18+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/post/</loc>
-    <lastmod>2024-09-17T22:04:00+08:00</lastmod>
+    <lastmod>2024-10-20T15:23:18+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/p/neovim-configuraion-usage/</loc>
+    <lastmod>2024-10-20T15:17:52+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/p/history_of_wifi/</loc>
+    <lastmod>2024-09-19T09:29:34+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/p/wifi-wireless-communication-fundamental/</loc>
     <lastmod>2024-09-17T22:04:00+08:00</lastmod>
@@ -23,7 +32,7 @@
     <loc>https://blog.jaxwang.top/p/ieee80211-automatic-channel-selection/</loc>
     <lastmod>2024-09-13T22:13:36+08:00</lastmod>
   </url><url>
-    <loc>https://blog.jaxwang.top/p/extensible_authentication_rotocol/</loc>
+    <loc>https://blog.jaxwang.top/p/extensible-authentication-protocol/</loc>
     <lastmod>2024-09-05T23:53:25+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/kernel/</loc>
@@ -38,22 +47,22 @@
     <loc>https://blog.jaxwang.top/tags/wsl/</loc>
     <lastmod>2024-08-14T11:04:51+08:00</lastmod>
   </url><url>
-    <loc>https://blog.jaxwang.top/p/wsl2_kernel_update/</loc>
+    <loc>https://blog.jaxwang.top/p/wsl2-kernel-update/</loc>
     <lastmod>2024-08-14T11:04:51+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/openwrt/</loc>
     <lastmod>2024-07-28T20:47:05+08:00</lastmod>
   </url><url>
-    <loc>https://blog.jaxwang.top/p/openwrt_ubus/</loc>
+    <loc>https://blog.jaxwang.top/p/openwrt-ubus/</loc>
     <lastmod>2024-07-28T20:47:05+08:00</lastmod>
   </url><url>
-    <loc>https://blog.jaxwang.top/p/openwrt_rust_package_build/</loc>
+    <loc>https://blog.jaxwang.top/p/openwrt-rust-package-build/</loc>
     <lastmod>2024-07-28T11:29:49+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/rust/</loc>
     <lastmod>2024-07-28T11:29:49+08:00</lastmod>
   </url><url>
-    <loc>https://blog.jaxwang.top/p/openwrt_new_package_build/</loc>
+    <loc>https://blog.jaxwang.top/p/openwrt-new-package-build/</loc>
     <lastmod>2024-07-27T18:30:52+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/ieee80211/</loc>
@@ -106,9 +115,5 @@
   </url><url>
     <loc>https://blog.jaxwang.top/p/cloudflare-r2-image/</loc>
     <lastmod>2024-06-15T10:02:46+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.jaxwang.top/p/</loc>
-  </url><url>
-    <loc>https://blog.jaxwang.top/p/</loc>
   </url>
 </urlset>

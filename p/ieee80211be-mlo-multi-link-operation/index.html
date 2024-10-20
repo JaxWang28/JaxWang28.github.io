@@ -82,17 +82,23 @@ Multi-Link Device，支持 MLO Device。<br>
 <p><img src="https://img.jaxwang.top/2024/09/fdb1f9b0da76c5e0e671808954a29615.png" alt=""></p>
 <p>采用异步多链路时，每条链路的传输独立，互不影响，<code>STR</code> 工作模式被提出。<br>
 但是当每个 link 所在的 Radio 没有充分隔离时，其中一条 link 的传输势必会对另一条 link 产生干扰，这种干扰为 <code>in-device conxextence(IDC)</code> 干扰。为了解决这个问题，采用同步多链路的 <code>Non-STR(NSTR)</code> 工作模式被提出。</p>
-<h1 id="0x04-simultaneous-transmit--receive-str">0x04 Simultaneous Transmit &amp; Receive (STR)</h1>
+<h1 id="0x04-str-and-nstr">0x04 STR and NSTR</h1>
+<h2 id="simultaneous-transmit--receive-str">Simultaneous Transmit &amp; Receive (STR)</h2>
 <p>STR 允许在多条 link 独立工作，link 间互不干扰。当两条 link 分别进行 TX 和 RX 时，便产生了一种全双工的现象。</p>
 <p><img src="https://img.jaxwang.top/2024/09/49847998f28024848cc378c191c9b0d2.png" alt=""></p>
 <p>STR 与 双频双并发 DBDC 的区别？</p>
-<h1 id="0x05-non-simultaneous-transmit-and-receive-nstr">0x05 Non-Simultaneous Transmit and Receive (NSTR)</h1>
+<h2 id="non-simultaneous-transmit-and-receive-nstr">Non-Simultaneous Transmit and Receive (NSTR)</h2>
 <p>NSTR 不允许在多条 link 独立工作，在同一时间所有 link 必须同时接收或发送。并且传输必须同时开始与结束。</p>
 <p><img src="https://img.jaxwang.top/2024/09/ec2c3f8966f9a4c02fdb4f9b59743922.png" alt=""></p>
 <p><em>其他细节？</em></p>
-<h1 id="0x06-multi-link-multi-radio-mlmr">0x06 Multi-Link Multi-Radio (MLMR)</h1>
+<h1 id="0x05-mlmr-mlsr-emlsr">0x05 MLMR MLSR EMLSR</h1>
+<h2 id="multi-link-multi-radio-mlmr">Multi-Link Multi-Radio (MLMR)</h2>
 <p>上述两种模式被称为 Multi-Link Multi-Radio 模式，这这种模式下，link 是被静态分配的，而不可以动态切换。<br></p>
-<h1 id="0x0-ehanced-multi-link-signal-radio-emlsr">0x0 Ehanced Multi-Link Signal-Radio (EMLSR)</h1>
+<p>Links are statically assigned and cannot switch to other frequencies dynamically.</p>
+<h2 id="mlsr">MLSR</h2>
+<p>Links can switch to other frequencies dynamically.</p>
+<h2 id="ehanced-multi-link-signal-radio-emlsr">Ehanced Multi-Link Signal-Radio (EMLSR)</h2>
+<p>Defined to dynamically switch all multi-link capable radios and antennas to a single link.</p>
 <h1 id="0xff-参考">0xff 参考</h1>
 <ul>
 <li>
@@ -112,6 +118,9 @@ Multi-Link Device，支持 MLO Device。<br>
 </li>
 <li>
 <p><a href="https://zhuanlan.zhihu.com/p/518719569">https://zhuanlan.zhihu.com/p/518719569</a></p>
+</li>
+<li>
+<p><a href="https://www.mediatek.com/technology/mlo-infographic">https://www.mediatek.com/technology/mlo-infographic</a></p>
 </li>
 </ul>
 
