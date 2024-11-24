@@ -6,8 +6,15 @@
     <description>Recent content in Posts on Jackson Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 02 Nov 2024 18:11:54 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 24 Nov 2024 19:45:06 +0800</lastBuildDate>
     <atom:link href="https://blog.jaxwang.top/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>路由器硬件组成</title>
+      <link>https://blog.jaxwang.top/p/router-hardware/</link>
+      <pubDate>Sun, 24 Nov 2024 19:45:06 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/p/router-hardware/</guid>
+      <description>&lt;p&gt;本文以 &lt;code&gt;Redmi AX6000&lt;/code&gt; 为例，介绍现代路由器中硬件组成，整理为以下部分：&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;CPU&lt;/li&gt;&#xA;&lt;li&gt;RAM&lt;/li&gt;&#xA;&lt;li&gt;ROM Flash&lt;/li&gt;&#xA;&lt;li&gt;交换芯片&lt;/li&gt;&#xA;&lt;li&gt;RF 芯片&lt;/li&gt;&#xA;&lt;li&gt;FEM 芯片&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;h1 id=&#34;cpu&#34;&gt;CPU&lt;/h1&gt;&#xA;&lt;p&gt;目前主流的路由器芯片为 &lt;strong&gt;QualComm BraodCom MediaTek RealTek&lt;/strong&gt;。对于一款 CPU，尤其需要关注这些参数：&lt;strong&gt;型号、架构、核心数、制程、频率&lt;/strong&gt;。  &lt;br&gt;&lt;/p&gt;&#xA;&lt;p&gt;Redmi AX6000 CPU 参数：&lt;br&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;型号：MediaTek MT7986A&lt;/li&gt;&#xA;&lt;li&gt;架构：ARM Cortex-A53&lt;/li&gt;&#xA;&lt;li&gt;核心数：4 核&lt;/li&gt;&#xA;&lt;li&gt;制程：12nm&lt;/li&gt;&#xA;&lt;li&gt;频率：2.0 GHz&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2024/11/593b4f15b720827f57cc27336a240a39.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h1 id=&#34;ram&#34;&gt;RAM&lt;/h1&gt;&#xA;&lt;p&gt;目前主流的 RAM 均为 Double Data Rate Synchronous Dynamic Random Access Memory，简称&lt;strong&gt;DDR SDRAM&lt;/strong&gt;或&lt;strong&gt;DDR&lt;/strong&gt;。关于 RAM 需要关注：&lt;strong&gt;类型、型号、容量、频率&lt;/strong&gt;。 &lt;br&gt;&lt;/p&gt;&#xA;&lt;p&gt;Redmi AX6000 RAM 参数：&lt;br&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;类型：DDR3&lt;/li&gt;&#xA;&lt;li&gt;型号：K4A4G165WF-BCW&lt;/li&gt;&#xA;&lt;li&gt;容量：512 MB&lt;/li&gt;&#xA;&lt;li&gt;频率：3200 MHz&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2024/11/9372c151d96a21ba55fdf02e879fbde6.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h1 id=&#34;rom-flash&#34;&gt;ROM Flash&lt;/h1&gt;&#xA;&lt;p&gt;Redmi AX6000 Flash 参数：&lt;br&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;型号：F50L1G41LB&lt;/li&gt;&#xA;&lt;li&gt;容量：128MB&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2024/11/4ad1efa4af7e3292989104efb5eea9e4.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h1 id=&#34;交换芯片&#34;&gt;交换芯片&lt;/h1&gt;&#xA;&lt;p&gt;关注点：吞吐量、包转发率、延迟、背板带宽、缓存大小、三层功能、VLAN、QoS、ACL、NAT、隧道协议、硬件加速能力。&lt;br&gt;&lt;/p&gt;</description>
+    </item>
     <item>
       <title>RustDesk 自建服务器</title>
       <link>https://blog.jaxwang.top/p/rustdesk-server-oss/</link>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>路由器硬件组成 | Jackson Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '7S26TLKGMX');
+        }
+      </script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/post/">Posts</a></li>
+      
+      <li><a href="/">About</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/">RSS</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">路由器硬件组成</span></h1>
+
+<h2 class="date">
+ 2024/11/24 
+&nbsp
+<span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>次阅读量</span>
+</h2>
+</div>
+
+<main>
+<p>本文以 <code>Redmi AX6000</code> 为例，介绍现代路由器中硬件组成，整理为以下部分：</p>
+<ul>
+<li>CPU</li>
+<li>RAM</li>
+<li>ROM Flash</li>
+<li>交换芯片</li>
+<li>RF 芯片</li>
+<li>FEM 芯片</li>
+</ul>
+<h1 id="cpu">CPU</h1>
+<p>目前主流的路由器芯片为 <strong>QualComm BraodCom MediaTek RealTek</strong>。对于一款 CPU，尤其需要关注这些参数：<strong>型号、架构、核心数、制程、频率</strong>。  <br></p>
+<p>Redmi AX6000 CPU 参数：<br></p>
+<ul>
+<li>型号：MediaTek MT7986A</li>
+<li>架构：ARM Cortex-A53</li>
+<li>核心数：4 核</li>
+<li>制程：12nm</li>
+<li>频率：2.0 GHz</li>
+</ul>
+<p><img src="https://img.jaxwang.top/2024/11/593b4f15b720827f57cc27336a240a39.png" alt=""></p>
+<h1 id="ram">RAM</h1>
+<p>目前主流的 RAM 均为 Double Data Rate Synchronous Dynamic Random Access Memory，简称<strong>DDR SDRAM</strong>或<strong>DDR</strong>。关于 RAM 需要关注：<strong>类型、型号、容量、频率</strong>。 <br></p>
+<p>Redmi AX6000 RAM 参数：<br></p>
+<ul>
+<li>类型：DDR3</li>
+<li>型号：K4A4G165WF-BCW</li>
+<li>容量：512 MB</li>
+<li>频率：3200 MHz</li>
+</ul>
+<p><img src="https://img.jaxwang.top/2024/11/9372c151d96a21ba55fdf02e879fbde6.png" alt=""></p>
+<h1 id="rom-flash">ROM Flash</h1>
+<p>Redmi AX6000 Flash 参数：<br></p>
+<ul>
+<li>型号：F50L1G41LB</li>
+<li>容量：128MB</li>
+</ul>
+<p><img src="https://img.jaxwang.top/2024/11/4ad1efa4af7e3292989104efb5eea9e4.png" alt=""></p>
+<h1 id="交换芯片">交换芯片</h1>
+<p>关注点：吞吐量、包转发率、延迟、背板带宽、缓存大小、三层功能、VLAN、QoS、ACL、NAT、隧道协议、硬件加速能力。<br></p>
+<p>Redmi AX6000 交换芯片参数：<br></p>
+<ul>
+<li>型号：MT7531A</li>
+</ul>
+<p><img src="https://img.jaxwang.top/2024/11/1ec95b35864bf4766a59dbb32d482e9f.png" alt=""></p>
+<h1 id="rf-芯片">RF 芯片</h1>
+<h2 id="24g-rf">2.4G RF</h2>
+<p>2.4G RF芯片型号是MT7976GN，通过”IQ“与MT7986A连接，支持4x4MIMO的Wi-Fi 6，在40MHz频宽和1024-QAM，最高速率1147Mbps</p>
+<p><img src="https://img.jaxwang.top/2024/11/3b5df8fd5e9715b3576a0b5267bf2fc0.png" alt=""></p>
+<h2 id="5g-rf">5G RF</h2>
+<p>Redmi AX6000 5G RF 芯片参数：<br></p>
+<ul>
+<li>型号：MT7976AN</li>
+<li>4x4 MIMO WiFi 6</li>
+<li>160MHz 1024-QAM 最高速率 4804Mbps</li>
+</ul>
+<p><img src="https://img.jaxwang.top/2024/11/fe09e99d90e078e89a5b4d14f08f1cd3.png" alt=""></p>
+<p><strong>IQ 接口</strong>：
+红米 AX6000 的 MT7986A（主 SoC）和 MT7976AN（5G RF 芯片）之间通过 IQ 接口连接，这是 RF 系统中常见的设计。
+<strong>IQ 接口用于射频信号传输</strong></p>
+<ul>
+<li>IQ 接口允许主 SoC（MT7986A）将数字信号处理后的 <strong>基带信号</strong>（即 IQ 信号）传递给 RF 芯片（MT7976AN）。</li>
+<li>RF 芯片负责将 IQ 信号上变频为射频信号并通过天线发射，或将接收到的射频信号下变频为基带信号传回 SoC。</li>
+</ul>
+<h1 id="fem-芯片">FEM 芯片</h1>
+<p><strong>FEM 芯片</strong>（<strong>Front-End Module</strong>，前端模块）是无线通信设备中的一种关键射频组件，集成了信号发送和接收路径中的多个前端功能，用于优化射频性能并简化设备设计。</p>
+<h3 id="fem-芯片的基本概念"><strong>FEM 芯片的基本概念</strong></h3>
+<p>FEM 芯片位于无线通信系统的射频前端（从天线到基带处理器之间的部分），它整合了与信号发射和接收相关的多个关键模块，例如功率放大器（PA）、低噪声放大器（LNA）、开关和滤波器。</p>
+<p><strong>FEM 芯片的主要功能</strong></p>
+<ol>
+<li>
+<p><strong>信号发射路径</strong></p>
+<ul>
+<li><strong>功率放大器（PA）</strong>：
+<ul>
+<li>将信号从基带处理器输出的低功率信号放大到足够高的功率，以便通过天线发射。</li>
+<li>需要在放大过程中尽量减少失真，确保信号质量。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>信号接收路径</strong></p>
+<ul>
+<li><strong>低噪声放大器（LNA）</strong>：
+<ul>
+<li>在信号接收阶段对微弱的天线信号进行放大，同时尽量减少噪声。</li>
+<li>提高接收信号的信噪比（SNR）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>开关功能</strong></p>
+<ul>
+<li>在发射和接收模式之间切换，确保信号不会互相干扰。</li>
+<li>开关通常与天线共享一个通道。</li>
+</ul>
+</li>
+<li>
+<p><strong>滤波功能</strong></p>
+<ul>
+<li>使用滤波器滤除不需要的干扰信号或带外噪声。</li>
+<li>确保只有目标频段的信号被处理，优化系统性能。</li>
+</ul>
+</li>
+<li>
+<p><strong>双工器或双工功能</strong></p>
+<ul>
+<li>支持全双工通信（同时发送和接收信号）。</li>
+<li>分离发射和接收信号的频段。</li>
+</ul>
+</li>
+</ol>
+<p>型号：RTC66568</p>
+<p><img src="https://img.jaxwang.top/2024/11/4fa8c496d793ee6fa77bfb0080a53224.png" alt=""></p>
+<h1 id="参考资料">参考资料</h1>
+<p>Redmi AX6000 拆解 <a href="https://www.acwifi.net/19676.html">https://www.acwifi.net/19676.html</a> <br></p>
+
+</main>
+<hr/>
+
+<script src="https://giscus.app/client.js"
+        data-repo="JaxWang28/Blog"
+        data-repo-id="R_kgDOIbrexg"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOIbrexs4CSjN8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+  <footer>
+  <hr/>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+
+<div class="busuanzi-footer">
+  <span id="busuanzi_container_site_pv">
+    总访问量 <span id="busuanzi_value_site_pv"></span> 次
+  </span>
+  <span id="busuanzi_container_site_uv">
+    访客数 <span id="busuanzi_value_site_uv"></span> 人次
+  </span>
+</div>
+  
+  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2017 &ndash; 2024 | <a href="https://github.com/jaxwang28">Github</a>
+  
+  </footer>
+  </body>
+</html>
+

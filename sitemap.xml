@@ -3,10 +3,25 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://blog.jaxwang.top/</loc>
-    <lastmod>2024-11-02T18:11:54+08:00</lastmod>
+    <lastmod>2024-11-24T19:45:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/tags/openwrt/</loc>
+    <lastmod>2024-11-24T19:45:06+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/post/</loc>
-    <lastmod>2024-11-02T18:11:54+08:00</lastmod>
+    <lastmod>2024-11-24T19:45:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/tags/router/</loc>
+    <lastmod>2024-11-24T19:45:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/tags/</loc>
+    <lastmod>2024-11-24T19:45:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/tags/wifi/</loc>
+    <lastmod>2024-11-24T19:45:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/p/router-hardware/</loc>
+    <lastmod>2024-11-24T19:45:06+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/p/rustdesk-server-oss/</loc>
     <lastmod>2024-11-02T18:11:54+08:00</lastmod>
@@ -35,7 +50,16 @@
     <loc>https://blog.jaxwang.top/p/ieee80211-automatic-channel-selection/</loc>
     <lastmod>2024-09-13T22:13:36+08:00</lastmod>
   </url><url>
+    <loc>https://blog.jaxwang.top/categories/</loc>
+    <lastmod>2024-09-05T23:53:25+08:00</lastmod>
+  </url><url>
     <loc>https://blog.jaxwang.top/p/extensible-authentication-protocol/</loc>
+    <lastmod>2024-09-05T23:53:25+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/tags/protocol/</loc>
+    <lastmod>2024-09-05T23:53:25+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/categories/protocol/</loc>
     <lastmod>2024-09-05T23:53:25+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/kernel/</loc>
@@ -44,17 +68,11 @@
     <loc>https://blog.jaxwang.top/tags/linux/</loc>
     <lastmod>2024-08-14T11:04:51+08:00</lastmod>
   </url><url>
-    <loc>https://blog.jaxwang.top/tags/</loc>
-    <lastmod>2024-08-14T11:04:51+08:00</lastmod>
-  </url><url>
     <loc>https://blog.jaxwang.top/tags/wsl/</loc>
     <lastmod>2024-08-14T11:04:51+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/p/wsl2-kernel-update/</loc>
     <lastmod>2024-08-14T11:04:51+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.jaxwang.top/tags/openwrt/</loc>
-    <lastmod>2024-07-28T20:47:05+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/p/openwrt-ubus/</loc>
     <lastmod>2024-07-28T20:47:05+08:00</lastmod>
@@ -69,9 +87,6 @@
     <lastmod>2024-07-27T18:30:52+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/ieee80211/</loc>
-    <lastmod>2024-06-30T21:32:20+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.jaxwang.top/tags/wifi/</loc>
     <lastmod>2024-06-30T21:32:20+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/wireless/</loc>
@@ -97,9 +112,6 @@
   </url><url>
     <loc>https://blog.jaxwang.top/p/githugpages-custom-domain/</loc>
     <lastmod>2024-06-16T10:02:46+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.jaxwang.top/categories/</loc>
-    <lastmod>2024-06-16T00:02:46+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/cloudflare/</loc>
     <lastmod>2024-06-16T00:02:46+08:00</lastmod>
