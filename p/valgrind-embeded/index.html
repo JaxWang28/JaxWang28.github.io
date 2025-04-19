@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>嵌入式 valgrind | Jackson Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '7S26TLKGMX');
+        }
+      </script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/post/">Posts</a></li>
+      
+      <li><a href="/">About</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/">RSS</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">嵌入式 valgrind</span></h1>
+
+<h2 class="date">
+ 2025/04/19 
+&nbsp
+<span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>次阅读量</span>
+</h2>
+</div>
+
+<main>
+<h1 id="交叉编译">交叉编译</h1>
+<ol>
+<li>指定 <code>toolchains</code></li>
+</ol>
+<pre><code>export GCC_PATH=/your_path_for_linaro/bin
+export CC=${GCC_PATH}/aarch64-linux-gnu-gcc
+export LD=${GCC_PATH}/aarch64-linux-gnu-ld
+export AR=${GCC_PATH}/aarch64-linux-gnu-ar
+</code></pre>
+<ol start="2">
+<li>编译配置</li>
+</ol>
+<pre><code>cd valgrind
+./autogen.sh
+./configure --prefix=`pwd`/Inst --host=aarch64-unknown-linux --enable-only64bit
+</code></pre>
+<ol start="3">
+<li>编译安装</li>
+</ol>
+<pre><code>make -j4 install
+</code></pre>
+<h1 id="带调试信息的-libc">带调试信息的 libc</h1>
+<p>valgrind 需要使用带调试信息的 <code>libc</code>，否则会报 <code>cannot be set up</code> 错误。</p>
+<p><code>libc</code> 可以在交叉编译工具链中找到。</p>
+<pre><code>$ find . -name &quot;*ld*.so&quot;
+./aarch64-linux-gnu/libc/lib/ld-2.25.so
+$ file ./aarch64-linux-gnu/libc/lib/ld-
+ld-2.25.so             ld-linux-aarch64.so.1
+$ file ./aarch64-linux-gnu/libc/lib/ld-2.25.so
+./aarch64-linux-gnu/libc/lib/ld-2.25.so: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, BuildID[sha1]=73b23c16ff9fe3eab046636cd9dd6db9d3309f27, with debug_info, not stripped
+</code></pre>
+<h1 id="启动">启动</h1>
+<p>将编译产生的工具目录和 <code>libc</code> 放入板子，启动 valgrind.</p>
+<pre><code>export VALGRIND_LIB=/libexec/valgrind &amp;&amp; valgrind --tool=memcheck --leak-check=full /tmp/ld-2.28.so program
+</code></pre>
+<p>如果调试的 daemon 程序，可以在运行一段时间后通过 <code>SIGTERM</code> 信号终止 <code>valgrind</code> 获取结果。</p>
+<h1 id="ref">Ref.</h1>
+<p><a href="https://www.cnblogs.com/yucloud/p/armbuild_valgrind3.html">https://www.cnblogs.com/yucloud/p/armbuild_valgrind3.html</a>
+<a href="https://valgrind.org/downloads/repository.html">https://valgrind.org/downloads/repository.html</a></p>
+
+</main>
+<hr/>
+
+<script src="https://giscus.app/client.js"
+        data-repo="JaxWang28/Blog"
+        data-repo-id="R_kgDOIbrexg"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOIbrexs4CSjN8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+  <footer>
+  <hr/>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+
+<div class="busuanzi-footer">
+  <span id="busuanzi_container_site_pv">
+    总访问量 <span id="busuanzi_value_site_pv"></span> 次
+  </span>
+  <span id="busuanzi_container_site_uv">
+    访客数 <span id="busuanzi_value_site_uv"></span> 人次
+  </span>
+</div>
+  
+  <hr/>
+  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2017 &ndash; 2025 | <a href="https://github.com/jaxwang28">Github</a>
+  
+  </footer>
+  </body>
+</html>
+
