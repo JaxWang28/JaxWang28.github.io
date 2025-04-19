@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>x86 Linux 启动流程第一阶段 —— setup | Jackson Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '7S26TLKGMX');
+        }
+      </script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/post/">Posts</a></li>
+      
+      <li><a href="/">About</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/">RSS</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">x86 Linux 启动流程第一阶段 —— setup</span></h1>
+
+<h2 class="date">
+ 2025/04/19 
+&nbsp
+<span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>次阅读量</span>
+</h2>
+</div>
+
+<main>
+<pre><code>linux-6.12.4
+QEMU emulator version 8.2.2 (Debian 1:8.2.2+ds-0ubuntu1.6)
+</code></pre>
+<h1 id="魔数-mz">魔数 MZ</h1>
+<pre><code>readelf -x .bstext  arch/x86/boot/setup.elf
+Hex dump of section '.bstext':
+0x00000000 4d5a0000 00000000 00000000 00000000 MZ..............
+</code></pre>
+<pre><code>xxd arch/x86/boot/setup.bin
+00000000: 4d5a 0000 0000 0000 0000 0000 0000 0000  MZ..............
+00000010: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+</code></pre>
+<pre><code>(gdb) hb *0x10200
+(gdb) c
+(gdb) x/2c 0x10000
+0x10000 &lt;exception_stacks+16384&gt;:       77 'M'  90 'Z'
+</code></pre>
+<h1 id="setup-过程函数跳转">Setup 过程函数跳转</h1>
+<p><img src="https://img.jaxwang.top/2025/04/1ea16f28231769c5f553393cfd522178.png" alt=""></p>
+<h1 id="_start">_start</h1>
+<p>bootloader 将 <code>setup.bin</code> 加载到 <code>0x10000</code> 地址处后，将 <code>CS</code> 置为 <code>0x1020</code> ，<code>IP</code> 置为 <code>0x0</code>。通过计算可以得知地址为 <code>0x10200</code>。</p>
+<pre><code>nm arch/x86/boot/setup.elf  | grep 200
+00000200 a falign
+00000200 R _start
+</code></pre>
+<pre><code>arch/x86/boot/header.S
+        # offset 512, entry point
+
+        .globl  _start
+_start:
+                # Explicitly enter this as bytes, or the assembler
+                # tries to generate a 3-byte jump here, which causes
+                # everything else to push off to the wrong offset.
+                .byte   0xeb            # short (2-byte) jump
+                .byte   start_of_setup-1f
+1:
+// start_of_setup -1f is offset 
+// 0xeb is short jump, 0xeb &lt;offset&gt;
+</code></pre>
+<p>通过源码可知，进入 <code>0x10200</code> 后，跳转到 <code>start_of_setup</code> 处。</p>
+<h1 id="start_of_setup">start_of_setup</h1>
+<ul>
+<li>初始化寄存器状态</li>
+<li>准备堆栈</li>
+<li>跳转到 <code>main</code></li>
+</ul>
+<h1 id="main">main</h1>
+<ul>
+<li>各种方面的初始化</li>
+</ul>
+<h1 id="go_to_protected_mode">go_to_protected_mode</h1>
+<ul>
+<li>为 <code>protected_mode</code> 做准备</li>
+</ul>
+<h1 id="protected_mode_jump">protected_mode_jump</h1>
+<ul>
+<li>通过汇编跳转到 <code>protected_mode</code></li>
+</ul>
+<pre><code>jmpl    *%eax                   # Jump to the 32-bit entrypoint
+
+// 这里的 eax 是 C 语言调用的第一个参数，在 pm.c 中可以找到参数为 boot_param.hdr.code32_start
+</code></pre>
+
+</main>
+<hr/>
+
+<script src="https://giscus.app/client.js"
+        data-repo="JaxWang28/Blog"
+        data-repo-id="R_kgDOIbrexg"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOIbrexs4CSjN8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+  <footer>
+  <hr/>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+
+<div class="busuanzi-footer">
+  <span id="busuanzi_container_site_pv">
+    总访问量 <span id="busuanzi_value_site_pv"></span> 次
+  </span>
+  <span id="busuanzi_container_site_uv">
+    访客数 <span id="busuanzi_value_site_uv"></span> 人次
+  </span>
+</div>
+  
+  <hr/>
+  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2017 &ndash; 2025 | <a href="https://github.com/jaxwang28">Github</a>
+  
+  </footer>
+  </body>
+</html>
+

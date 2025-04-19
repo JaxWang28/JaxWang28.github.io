@@ -3,18 +3,30 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://blog.jaxwang.top/</loc>
-    <lastmod>2024-11-24T19:45:06+08:00</lastmod>
+    <lastmod>2025-04-19T20:45:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/tags/kernel/</loc>
+    <lastmod>2025-04-19T20:45:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/tags/linux/</loc>
+    <lastmod>2025-04-19T20:45:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/post/</loc>
+    <lastmod>2025-04-19T20:45:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/tags/</loc>
+    <lastmod>2025-04-19T20:45:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/tags/x86/</loc>
+    <lastmod>2025-04-19T20:45:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/p/x86-linux-kernet-boot-setup/</loc>
+    <lastmod>2025-04-19T20:45:06+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/openwrt/</loc>
     <lastmod>2024-11-24T19:45:06+08:00</lastmod>
   </url><url>
-    <loc>https://blog.jaxwang.top/post/</loc>
-    <lastmod>2024-11-24T19:45:06+08:00</lastmod>
-  </url><url>
     <loc>https://blog.jaxwang.top/tags/router/</loc>
-    <lastmod>2024-11-24T19:45:06+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.jaxwang.top/tags/</loc>
     <lastmod>2024-11-24T19:45:06+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/wifi/</loc>
@@ -61,12 +73,6 @@
   </url><url>
     <loc>https://blog.jaxwang.top/tags/protocol/</loc>
     <lastmod>2024-09-05T23:53:25+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.jaxwang.top/tags/kernel/</loc>
-    <lastmod>2024-08-14T11:04:51+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.jaxwang.top/tags/linux/</loc>
-    <lastmod>2024-08-14T11:04:51+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/wsl/</loc>
     <lastmod>2024-08-14T11:04:51+08:00</lastmod>
