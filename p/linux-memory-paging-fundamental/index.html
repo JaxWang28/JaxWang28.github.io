@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Linux-内存管理 - 分页虚拟存储理论 | Jackson Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '7S26TLKGMX');
+        }
+      </script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/post/">Posts</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/about/">About</a></li>
+      
+      <li><a href="/">RSS</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">Linux-内存管理 - 分页虚拟存储理论</span></h1>
+
+<h2 class="date">
+ 2025/04/26 
+&nbsp
+<span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>次阅读量</span>
+</h2>
+</div>
+
+<main>
+<h1 id="0x01-虚拟存储器-virtual-memory">0x01 虚拟存储器 Virtual Memory</h1>
+<p>Virtual Memroy[1] 由 Fotheringham 在 1961 年提出[2]，其基本思想是：</p>
+<ul>
+<li>程序的代码数据和栈的总大小可以超过物理内存（RAM）</li>
+<li>操作系统将正在运行的程序的需要的那部分保留在内存中，而将当前不使用的部分放置在磁盘上，根据需要调入内存。</li>
+</ul>
+<p>根据虚拟存储器实现的技术可以分为：</p>
+<ol>
+<li>页式：采用**分页 Paging **技术</li>
+<li>段式：采用**分段 Segmentation **技术</li>
+<li>分页分段结合：Paged Segmentation</li>
+</ol>
+<p>目前大多数虚拟存储管理系统都采用**分页 paging ** 技术，本文也仅讲解分页存储管理。</p>
+<h1 id="0x02-分页基本思想">0x02 分页基本思想</h1>
+<ul>
+<li>将物理内存划分为为许多固定大小的内存块 ，称为<strong>物理页面 页框 page frame</strong>。</li>
+<li>将程序中使用的地址称为<strong>虚拟地址</strong>，并构成<strong>虚拟地址空间</strong>。将虚拟地址空间划分为大小相同的块，称为<strong>虚拟页面 page</strong>。</li>
+<li>CPU 访问程序中使用的地址时，并不是放在地址总线上，而是被送往<strong>存储管理单元 MMU</strong>，其将虚拟地址转化为物理地址后再进行访问。</li>
+</ul>
+<p><strong>Example</strong></p>
+<ul>
+<li>RAM 大小为 16KB，程序的虚拟地址空间为 32KB</li>
+<li>物理内存被划分为 4 个 4KB 大小的页框</li>
+<li>虚拟地址空间被划分为 8 个 4KB 大小的虚拟页面。</li>
+<li>此时系统中的映射关系如下:</li>
+</ul>
+<p><img src="https://img.jaxwang.top/2025/04/deaeef83c0af4f43e37743d248eda759.png" alt=""></p>
+<pre><code>MOVE REG,0x3000
+</code></pre>
+<p>启用分页虚拟内存后，CPU 并不会直接访问 <code>0x3000</code> ，而是将 <code>0x3000</code> 地址送往 MMU，MMU 根据上述映射关系，计算出物理地址为 <code>0x1000</code>，进而将 <code>0x1000</code> 处内容放在寄存器中。</p>
+<h1 id="0x03-页表">0x03 页表</h1>
+<p>用来记录 <strong>虚拟页面-&gt;物理页面</strong> 之间的映射关系，换而言之，<strong>页表保存了虚拟地址到物理地址之间的映射关系</strong>。</p>
+<p>从数学的角度讲，页表就是一个函数，MMU 利用这个函数，输入虚拟页面号，得到物理页面号。</p>
+<p>这里的关键时输入集合是虚拟页面，因此页框大小不变的情况下，虚拟地址空间越大，所需的页表也会越大，而不是取决于物理内存的大小。</p>
+<p>根据前文例子中的映射关系，可以得到如下简易的页表：</p>
+<p><img src="https://img.jaxwang.top/2025/04/dc550f843a67e32b72b9cae4255a6b7e.png" alt=""></p>
+<p>对于页表两个需要关注的问题：</p>
+<ul>
+<li>页表占据的空间</li>
+<li>页表的映射速度</li>
+</ul>
+<p>关于页表的空间，假设虚拟地址空间大小为 4GB，页框大小为 4KB，所需要的表项达到了 100 万个。而在 Linux 中，每个进程的虚拟地址空间都是独立的，每个进程都它自己的页表，总的页表体积非常大，因此常需要使用多级页表来解决这个问题。</p>
+<h1 id="0x04-mmu-工作原理">0x04 MMU 工作原理</h1>
+<ul>
+<li>将虚拟地址视为 <code>|虚拟页面号|页内偏移地址|</code></li>
+<li>虚拟页面号 &ndash;页表&ndash;&gt; 物理页面号</li>
+<li><code>|物理页面号|页内偏移地址|</code> -&gt; 物理地址</li>
+</ul>
+<p><strong>Example</strong> <code>MOVE REG, 0x3000</code>：</p>
+<ul>
+<li>0x<code>3|000</code> 虚拟页面号为 3 ,页内偏移地址为 <code>0x000</code></li>
+<li>根据页表 3 -&gt; 1</li>
+<li>物理地址 0x<code>1|000</code></li>
+</ul>
+<h1 id="0x05-多级页表">0x05 多级页表</h1>
+<p>多级页表的理论基础是，当进程运行时通常不会用到所有的虚拟地址空间。所以页表并不需要所有的页表项。</p>
+<p><strong>Example</strong>
+虚拟地址为 32 位（虚拟地址空间为 4GB），页面大小为 4KB。
+如果采用普通页表，虚拟页面号占 20 位，页内偏移地址占 12 位。所需的页表项数目为 <code>2^20</code> ，这是个非常庞大的数字。</p>
+<p>假设一个进程需要的内存空间仅为 12MB（而我们的虚拟地址空间可达 4GB），最低端的 4MB 程序代码，4MB 用来存储数据，最顶端的 4MB 用作栈。可以设计如下两级页表：</p>
+<p><img src="https://img.jaxwang.top/2025/04/39a1d5c4b9207c759375e219721eb956.png" alt=""></p>
+<ul>
+<li>建立 1 张一级页表，含有 1024 个页目录项，每项为一个地址或一个空值，该地址为一个二级页表的位置。</li>
+<li>建立 3 张二级页表，每个页表含有 1024 个表项，每个表项为一个物理页面号，即指向物理地址。每个页面为 4KB，因此每个二级页表即可指向 4MB 的地址空间。</li>
+</ul>
+<p>多级页表的 MMU 工作方式：</p>
+<p><strong>Example</strong></p>
+<pre><code>0x00400004
+</code></pre>
+<p><img src="https://img.jaxwang.top/2025/04/66c16a5daa2d0d28cbcb5ac4b6e6eafc.png" alt=""></p>
+<h1 id="0x06-页表项的结构">0x06 页表项的结构</h1>
+<p>页表项的核心是存储物理页面号，通常还需要存储一些属性来实现某些功能。不同的 CPU 及操作系统对页表项的设计是不同的。如下是一个典型的页表项：</p>
+<p><img src="https://img.jaxwang.top/2025/04/ebe9823cc478c255f049604b1e76d20e.png" alt=""></p>
+<ul>
+<li>保护位：表示允许对这个页面的操作是可读，可写，可读写。</li>
+<li>修改位：表示页面中的内容是否被修改过。也称为<strong>脏位</strong>。当一个页面需要被换下存到磁盘时，如果没有修改过就不需要将这部分内容存入磁盘。此时磁盘与内从中的内容是一致的。</li>
+<li>访问位：表示页面是否被访问过。用于页面置换算法，可优先置换掉没有被访问过的页面。</li>
+<li>有效位：表示这个页面是否在内存中。如果不在内存中则无效，此时 MMU 会产生一个缺页中断给 CPU，要求 CPU 将相应的页面置换到内存。</li>
+<li>禁用缓存位：表示页面是否可以被缓存。主要用于某些页面被映射到设备寄存器而不是 RAM。</li>
+</ul>
+<h1 id="0x07-关联存储器-tlb-transition-lookaside-buffer">0x07 关联存储器 TLB Transition Lookaside Buffer</h1>
+<p>绝大多数进程运行时，倾向于集中访问一小部分页面。一部分页表项会经常使用，这是局部性的一种体现。</p>
+<p>根据这个观察，设计出一种硬件，用来存储常用的页表项。
+当 MMU 根据虚拟页面号寻找页表项时首先从 TLB 中查找。而不需要在内存中查找页表项，减少了对内存的访问。</p>
+<p>如果 TLB 中没有，则在内存中的页表找到对应页表项，并在 TLB 中驱逐一个页表项，把需要访问的那个页表项放在 TLB 中。</p>
+<h1 id="0x08-页面置换算法">0x08 页面置换算法</h1>
+<p><strong>TODO</strong></p>
+<h1 id="0x09-ref">0x09 Ref.</h1>
+<p>[1] <a href="https://en.wikipedia.org/wiki/Virtual_memory">https://en.wikipedia.org/wiki/Virtual_memory</a>
+[2] <a href="https://dl.acm.org/doi/pdf/10.1145/366786.366800">https://dl.acm.org/doi/pdf/10.1145/366786.366800</a></p>
+
+</main>
+<hr/>
+
+<script src="https://giscus.app/client.js"
+        data-repo="JaxWang28/Blog"
+        data-repo-id="R_kgDOIbrexg"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOIbrexs4CSjN8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+  <footer>
+  <hr/>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+
+<div class="busuanzi-footer">
+  <span id="busuanzi_container_site_pv">
+    总访问量 <span id="busuanzi_value_site_pv"></span> 次
+  </span>
+  <span id="busuanzi_container_site_uv">
+    访客数 <span id="busuanzi_value_site_uv"></span> 人次
+  </span>
+</div>
+  
+  <hr/>
+  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2017 &ndash; 2025 | <a href="https://github.com/jaxwang28">Github</a>
+  
+  </footer>
+  </body>
+</html>
+
