@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Linux-内存管理 - 分页虚拟存储理论 | Jackson Blog</title>
+    <title>Linux - 内存管理 - 分页虚拟存储理论 | Jackson Blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     
@@ -52,7 +52,7 @@
     </nav>
 
 <div class="article-meta">
-<h1><span class="title">Linux-内存管理 - 分页虚拟存储理论</span></h1>
+<h1><span class="title">Linux - 内存管理 - 分页虚拟存储理论</span></h1>
 
 <h2 class="date">
  2025/04/26 
@@ -62,78 +62,96 @@
 </div>
 
 <main>
+<h1 id="0x00-很久之前">0x00 很久之前</h1>
+<p>在很久之前，计算机使用单程序存储管理。
+<img src="https://img.jaxwang.top/2025/04/ff061f834f1d31c57ea6d8cdf56f5f5f.png" alt=""></p>
+<p>在这种管理模式下，每次只能运行一个程序。操作系统每次将相应的程序从磁盘加载到 RAM 中。直至进程运行结束后跳转到操作系统代码，操作系统再根据用户需求将程序装入 RAM 中，覆盖掉旧的程序。存在问题：</p>
+<ul>
+<li>一次只能运行一个程序</li>
+<li>进程（程序）的切换很慢</li>
+<li>程序的大小取决于 RAM 物理内存的大小</li>
+</ul>
+<p><em>事实上，后面又发展了多道程序，交换技术等技术来试图解决上述问题但效果不好，这里就不展开讲了，但为什么会讲一下单道存储管理，因为其与 Linux 虚拟存储空间布局很像，暂时无需知道什么是虚拟存储空间。</em></p>
 <h1 id="0x01-虚拟存储器-virtual-memory">0x01 虚拟存储器 Virtual Memory</h1>
+<p>虚拟存储技术发展的根本原因：
+RAM 小且昂贵，无论是上世纪还是当下，RAM 都是小且昂贵的资源，所以我们不得不充分利用，进而发展出虚拟存储技术。假设我们的 RAM 可以无限大且廉价。
+<img src="https://img.jaxwang.top/2025/04/218c50bcec6a497456a3a8e11f1e4d1e.png" alt=""></p>
+<p>虚拟存储的基础及事实：</p>
+<ol>
+<li>局部性原理：程序在执行时呈现出局部性规律，即在一段时间内，整个程序的执行仅限于程序中的某一部分。这也意味着并不需要完全把程序加载到 RAM 也能保证程序的执行。</li>
+<li>磁盘空间很大且足够便宜，可以把程序暂时不需要的那一部分放在磁盘上，把需要的那部分放在 RAM 上。</li>
+</ol>
 <p>Virtual Memroy[1] 由 Fotheringham 在 1961 年提出[2]，其基本思想是：</p>
 <ul>
 <li>程序的代码数据和栈的总大小可以超过物理内存（RAM）</li>
 <li>操作系统将正在运行的程序的需要的那部分保留在内存中，而将当前不使用的部分放置在磁盘上，根据需要调入内存。</li>
 </ul>
+<p><img src="https://img.jaxwang.top/2025/04/ad0efef73393d346579d2f240337f46a.png" alt=""></p>
 <p>根据虚拟存储器实现的技术可以分为：</p>
 <ol>
-<li>页式：采用**分页 Paging **技术</li>
-<li>段式：采用**分段 Segmentation **技术</li>
+<li>页式：采用 <strong>分页 Paging</strong> 技术</li>
+<li>段式：采用 <strong>分段 Segmentation</strong> 技术</li>
 <li>分页分段结合：Paged Segmentation</li>
 </ol>
-<p>目前大多数虚拟存储管理系统都采用**分页 paging ** 技术，本文也仅讲解分页存储管理。</p>
+<p>目前大多数虚拟存储管理系统都采用<strong>分页 paging</strong> 技术，本文也仅讲解分页存储管理。</p>
 <h1 id="0x02-分页基本思想">0x02 分页基本思想</h1>
 <ul>
-<li>将物理内存划分为为许多固定大小的内存块 ，称为<strong>物理页面 页框 page frame</strong>。</li>
-<li>将程序中使用的地址称为<strong>虚拟地址</strong>，并构成<strong>虚拟地址空间</strong>。将虚拟地址空间划分为大小相同的块，称为<strong>虚拟页面 page</strong>。</li>
-<li>CPU 访问程序中使用的地址时，并不是放在地址总线上，而是被送往<strong>存储管理单元 MMU</strong>，其将虚拟地址转化为物理地址后再进行访问。</li>
+<li>将物理内存划分为为许多固定大小（<strong>PAGE SIZE</strong>）的内存块 ，称为<strong>物理页面 页框 page frame</strong>,并为每个页框从低地址开始编号称为<strong>PFN</strong>。</li>
+<li>将程序（用户程序和OS）中使用的地址称为<strong>虚拟地址</strong>，并构成<strong>虚拟地址空间</strong>。将虚拟地址空间划分为大小相同的块，称为<strong>虚拟页面 page</strong>。</li>
+<li>CPU 访问程序中使用的地址时，并不是放在地址总线上，而是被送往<strong>存储管理单元 MMU</strong>，其利用映射关系（其实就是页表）将虚拟地址转化为物理地址后再进行访问。</li>
 </ul>
 <p><strong>Example</strong></p>
 <ul>
-<li>RAM 大小为 16KB，程序的虚拟地址空间为 32KB</li>
-<li>物理内存被划分为 4 个 4KB 大小的页框</li>
-<li>虚拟地址空间被划分为 8 个 4KB 大小的虚拟页面。</li>
-<li>此时系统中的映射关系如下:</li>
+<li>RAM 大小为 16KB(0x0000 ~ 0x3fff)，虚拟地址空间为 32KB(0x0000 ~ 0x7fff)</li>
+<li>页框大小为 4KB</li>
+<li>某一时刻系统中的映射关系如下:</li>
+<li></li>
 </ul>
-<p><img src="https://img.jaxwang.top/2025/04/deaeef83c0af4f43e37743d248eda759.png" alt=""></p>
-<pre><code>MOVE REG,0x3000
+<p><img src="https://img.jaxwang.top/2025/04/f70475e5639c368e53403f4752234c7f.png" alt=""></p>
+<p>此时 CPU 执行下面指令：</p>
+<pre><code>MOVE REG,0x3002
 </code></pre>
-<p>启用分页虚拟内存后，CPU 并不会直接访问 <code>0x3000</code> ，而是将 <code>0x3000</code> 地址送往 MMU，MMU 根据上述映射关系，计算出物理地址为 <code>0x1000</code>，进而将 <code>0x1000</code> 处内容放在寄存器中。</p>
+<p>在启用分页虚拟内存后，CPU 看到的地址都是虚拟地址，此时 CPU 并不会直接把 <code>0x3002</code> 放在地址总线上，而是将 <code>0x3002</code> 地址送往 MMU，MMU 根据上述映射关系，找到页框号 PFN，计算出物理地址为 <code>0x0002</code>，进而将 <code>0x0002</code> 处内容放在寄存器中。</p>
+<p><img src="https://img.jaxwang.top/2025/04/77efb89e8e7c167be7fafab00e7ac1a2.png" alt=""></p>
+<p>MMU 如何工作:</p>
+<ol>
+<li>根据虚拟地址和映射关系（页表）找到 PFN</li>
+<li>PFN 和 页内偏移计算得到物理地址
+<em>物理地址计算公式</em></li>
+</ol>
+<pre><code>Physical Address = PFN * PAGE_SIZE + OFFSET
+</code></pre>
+<p>页内偏移计算：页内偏移通俗来讲就是余数，因为每个 Page 的大小是 4KB ，<code>0x3002</code> 就是 第三个 page，再偏移 <code>0x002</code> 位置。更简单一点就是虚拟地址的低 12 位（PAGE SIZE =4KB）。
+PFN 计算：这部分属于页表的内容，目前我们就是用眼看，可以看出来 PFN 是 0</p>
+<p><em>关于虚拟空间中的操作系统：用户程序的执行是依赖操作系统的，比如用户程序打印 Hello World 到屏幕，用户程序是不知道如何操作屏幕（硬件）的，因此需要操作系统来帮助其操作硬件。从用户程序跳转到操作系统也称为陷入内核态。但是陷入内核态时我们的页表还是进程的页表，也就是进程的虚拟地址空间。假设进程的虚拟地址空间中没有内核，那么此时 CPU 也不知道操作系统在何处了。理解这点我们才能理解 Linux 虚拟地址空间映射 map。</em></p>
 <h1 id="0x03-页表">0x03 页表</h1>
-<p>用来记录 <strong>虚拟页面-&gt;物理页面</strong> 之间的映射关系，换而言之，<strong>页表保存了虚拟地址到物理地址之间的映射关系</strong>。</p>
-<p>从数学的角度讲，页表就是一个函数，MMU 利用这个函数，输入虚拟页面号，得到物理页面号。</p>
-<p>这里的关键时输入集合是虚拟页面，因此页框大小不变的情况下，虚拟地址空间越大，所需的页表也会越大，而不是取决于物理内存的大小。</p>
-<p>根据前文例子中的映射关系，可以得到如下简易的页表：</p>
-<p><img src="https://img.jaxwang.top/2025/04/dc550f843a67e32b72b9cae4255a6b7e.png" alt=""></p>
+<p>用来保存 <strong>虚拟页面-&gt;物理页面</strong> 之间的映射关系，换而言之，页表保存了<strong>虚拟地址-&gt;物理地址</strong>之间的映射关系。</p>
+<p>从数学的角度讲，页表就是一个函数，MMU 利用这个函数，输入虚拟地址，得到页框号 PFN。</p>
+<p>这里的关键时输入集合是虚拟地址，因此页框大小不变的情况下，虚拟地址空间越大，所需的页表也会越大，而不是取决于物理内存的大小。</p>
+<p>我们还可以得出一个结论，<strong>一个页表对应一个虚拟地址空间</strong>，<strong>一个页表项对应一个页面</strong>。</p>
+<p>根据前文例子中的映射关系，可以得到如下简易的页表，这个页表以一个数组形式展现，其中的每一项我们称为页表项。页表项的核心是 PFN ，当然也需要存储一些其他信息，比方说虚拟内存对应的页面是否在 RAM 上。</p>
+<p><img src="https://img.jaxwang.top/2025/04/9ff411addab4595efb826e54f7e11345.png" alt=""></p>
 <p>对于页表两个需要关注的问题：</p>
 <ul>
 <li>页表占据的空间</li>
 <li>页表的映射速度</li>
 </ul>
-<p>关于页表的空间，假设虚拟地址空间大小为 4GB，页框大小为 4KB，所需要的表项达到了 100 万个。而在 Linux 中，每个进程的虚拟地址空间都是独立的，每个进程都它自己的页表，总的页表体积非常大，因此常需要使用多级页表来解决这个问题。</p>
-<h1 id="0x04-mmu-工作原理">0x04 MMU 工作原理</h1>
-<ul>
-<li>将虚拟地址视为 <code>|虚拟页面号|页内偏移地址|</code></li>
-<li>虚拟页面号 &ndash;页表&ndash;&gt; 物理页面号</li>
-<li><code>|物理页面号|页内偏移地址|</code> -&gt; 物理地址</li>
-</ul>
-<p><strong>Example</strong> <code>MOVE REG, 0x3000</code>：</p>
-<ul>
-<li>0x<code>3|000</code> 虚拟页面号为 3 ,页内偏移地址为 <code>0x000</code></li>
-<li>根据页表 3 -&gt; 1</li>
-<li>物理地址 0x<code>1|000</code></li>
-</ul>
-<h1 id="0x05-多级页表">0x05 多级页表</h1>
+<p>关于页表的空间，假设虚拟地址空间大小为 4GB，页框大小为 4KB，所需要的表项达到了 100 万个。而在 Linux 中，每个进程的虚拟地址空间都是独立的，每个进程都它自己的页表（上文每个页表对应一个虚拟地址空间），总的页表体积非常大，因此常需要使用多级页表来解决这个问题。</p>
+<h1 id="0x04-多级页表">0x04 多级页表</h1>
 <p>多级页表的理论基础是，当进程运行时通常不会用到所有的虚拟地址空间。所以页表并不需要所有的页表项。</p>
 <p><strong>Example</strong>
 虚拟地址为 32 位（虚拟地址空间为 4GB），页面大小为 4KB。
 如果采用普通页表，虚拟页面号占 20 位，页内偏移地址占 12 位。所需的页表项数目为 <code>2^20</code> ，这是个非常庞大的数字。</p>
-<p>假设一个进程需要的内存空间仅为 12MB（而我们的虚拟地址空间可达 4GB），最低端的 4MB 程序代码，4MB 用来存储数据，最顶端的 4MB 用作栈。可以设计如下两级页表：</p>
-<p><img src="https://img.jaxwang.top/2025/04/39a1d5c4b9207c759375e219721eb956.png" alt=""></p>
+<p>假设一个进程需要的内存空间仅为 8MB（而我们的虚拟地址空间可达 4GB），最低端的 4MB 程序代码，紧接着4MB 用来存储数据。前文讲过，<strong>一个页表项对应一个页面</strong>。这里我们只有 8MB 需要映射，也就是只需要 <code>8MB/4KB = 2048</code> 个页表项。</p>
+<p><img src="https://img.jaxwang.top/2025/04/1a61b42491296232dc6b8cfd8cda8edd.png" alt=""></p>
 <ul>
-<li>建立 1 张一级页表，含有 1024 个页目录项，每项为一个地址或一个空值，该地址为一个二级页表的位置。</li>
-<li>建立 3 张二级页表，每个页表含有 1024 个表项，每个表项为一个物理页面号，即指向物理地址。每个页面为 4KB，因此每个二级页表即可指向 4MB 的地址空间。</li>
+<li>建立 1 张<strong>页目录</strong>表，含有 1024 个页目录项，每项为一个地址或一个空值，该地址为一张页表的位置。</li>
+<li>建立 2 张<strong>页表</strong>，每个页表含有 1024 个表项，每个页面为 4KB，因此每个页表即可指向 4MB 的地址空间。</li>
 </ul>
-<p>多级页表的 MMU 工作方式：</p>
-<p><strong>Example</strong></p>
-<pre><code>0x00400004
-</code></pre>
-<p><img src="https://img.jaxwang.top/2025/04/66c16a5daa2d0d28cbcb5ac4b6e6eafc.png" alt=""></p>
-<h1 id="0x06-页表项的结构">0x06 页表项的结构</h1>
-<p>页表项的核心是存储物理页面号，通常还需要存储一些属性来实现某些功能。不同的 CPU 及操作系统对页表项的设计是不同的。如下是一个典型的页表项：</p>
+<p>多级页表的 MMU 如何工作？MMU 关键部分是计算出 PFN，计算 PFN 的关键是如何索引到页表项。</p>
+<p><img src="https://img.jaxwang.top/2025/04/06dcfdd9f8f6ff57ee5c8f9560bde574.png" alt=""></p>
+<h1 id="0x05-页表项的结构">0x05 页表项的结构</h1>
+<p>页表项的核心是存储页框号 PFN，通常还需要存储一些属性来实现某些功能。不同的 CPU 及操作系统对页表项的设计是不同的。如下是一个典型的页表项：</p>
 <p><img src="https://img.jaxwang.top/2025/04/ebe9823cc478c255f049604b1e76d20e.png" alt=""></p>
 <ul>
 <li>保护位：表示允许对这个页面的操作是可读，可写，可读写。</li>
@@ -142,16 +160,16 @@
 <li>有效位：表示这个页面是否在内存中。如果不在内存中则无效，此时 MMU 会产生一个缺页中断给 CPU，要求 CPU 将相应的页面置换到内存。</li>
 <li>禁用缓存位：表示页面是否可以被缓存。主要用于某些页面被映射到设备寄存器而不是 RAM。</li>
 </ul>
-<h1 id="0x07-关联存储器-tlb-transition-lookaside-buffer">0x07 关联存储器 TLB Transition Lookaside Buffer</h1>
+<h1 id="0x06-关联存储器-tlb-transition-lookaside-buffer">0x06 关联存储器 TLB Transition Lookaside Buffer</h1>
 <p>绝大多数进程运行时，倾向于集中访问一小部分页面。一部分页表项会经常使用，这是局部性的一种体现。</p>
 <p>根据这个观察，设计出一种硬件，用来存储常用的页表项。
 当 MMU 根据虚拟页面号寻找页表项时首先从 TLB 中查找。而不需要在内存中查找页表项，减少了对内存的访问。</p>
 <p>如果 TLB 中没有，则在内存中的页表找到对应页表项，并在 TLB 中驱逐一个页表项，把需要访问的那个页表项放在 TLB 中。</p>
-<h1 id="0x08-页面置换算法">0x08 页面置换算法</h1>
+<h1 id="0x07-页面置换算法">0x07 页面置换算法</h1>
 <p><strong>TODO</strong></p>
-<h1 id="0x09-ref">0x09 Ref.</h1>
-<p>[1] <a href="https://en.wikipedia.org/wiki/Virtual_memory">https://en.wikipedia.org/wiki/Virtual_memory</a>
-[2] <a href="https://dl.acm.org/doi/pdf/10.1145/366786.366800">https://dl.acm.org/doi/pdf/10.1145/366786.366800</a></p>
+<h1 id="0x08-ref">0x08 Ref.</h1>
+<p>[1] <a href="https://en.wikipedia.org/wiki/Virtual_memory">https://en.wikipedia.org/wiki/Virtual_memory</a></p>
+<p>[2] <a href="https://dl.acm.org/doi/pdf/10.1145/366786.366800">https://dl.acm.org/doi/pdf/10.1145/366786.366800</a></p>
 
 </main>
 <hr/>
