@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Linux - 内存管理 - 物理内存模型 | Jackson Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '7S26TLKGMX');
+        }
+      </script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/post/">Posts</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/about/">About</a></li>
+      
+      <li><a href="/">RSS</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">Linux - 内存管理 - 物理内存模型</span></h1>
+
+<h2 class="date">
+ 2025/04/29 
+&nbsp
+<span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>次阅读量</span>
+</h2>
+</div>
+
+<main>
+<p>4GB RAM 4KB 页面大小的 Linux 系统会产生一百万之多的 <code>struct page</code>，组织管理这些结构体的方式我们称为内存模型。Linux 目前支持两种模型：<code>FLATMEM</code> <code>SPARSEMEM</code>。</p>
+<p>无论选择哪个内存模型，都会通过<strong>一个或多个数组</strong>管理 <code>struct page</code>。</p>
+<h1 id="内存空洞-memory-hole">内存空洞 memory hole</h1>
+<p>事实上 RAM 只是物理地址空间的一部分，物理地址空间通常会出现一部分地址是不用做普通内存使用的，对于这地址我们称之为<strong>内存空洞 Memory Hole</strong>。</p>
+<p>使用 <code>qemu-system-x86_64 -m 8G </code> 启动 Kernel，可以看到下面 log</p>
+<pre><code>[    0.000000] BIOS-provided physical RAM map:
+[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable
+[    0.000000] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff] reserved
+[    0.000000] BIOS-e820: [mem 0x0000000000100000-0x00000000bffdffff] usable
+[    0.000000] BIOS-e820: [mem 0x00000000bffe0000-0x00000000bfffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff] reserved
+[    0.000000] BIOS-e820: [mem 0x0000000100000000-0x000000023fffffff] usable
+[    0.000000] BIOS-e820: [mem 0x000000fd00000000-0x000000ffffffffff] reserved
+</code></pre>
+<p>对于其中 <code>reserved</code> 的部分是不可作为普通内存使用的。</p>
+<h1 id="flatmem-平坦内存模型">FLATMEM 平坦内存模型</h1>
+<p>最简单的内存模型，只适用于具有连续或大部分连续物理内存的 non-NUMA 系统。</p>
+<h2 id="基本思想">基本思想</h2>
+<p>仅使用一个<strong>全局数组</strong> <code>mem_map</code> 来组织所有物理内存的 <code>struct page</code>。</p>
+<p><em>mm/memory.c</em></p>
+<pre><code>#ifndef CONFIG_NUMA
+unsigned long max_mapnr;
+EXPORT_SYMBOL(max_mapnr);
+
+struct page *mem_map;
+EXPORT_SYMBOL(mem_map);
+#endif
+</code></pre>
+<p><strong>Example</strong> <em>物理地址空间 4MB PAGE_SIZE 4KB 的 Linux 系统</em>
+<img src="https://img.jaxwang.top/2025/04/0068e2e33ea222f51b9b2c73f2db3834.png" alt=""></p>
+<p>FLATMEM 物理内存模型，大多数架构中，内存空洞也会有对应的 entry，但是永远不会被初始化。</p>
+<p>某些体系结构可能会释放那些不对应实际物理页面的 <code>mem_map</code> 数组部分。在这种情况下，体系结构特定的 <code>pfn_valid()</code> 实现需要考虑 <code>mem_map</code> 中的空洞。</p>
+<h2 id="pfn---struct-page">PFN &lt;-&gt; struct page</h2>
+<pre><code>PFN - ARCH_PFN_OFFSET = struct page 在 mem_map 中的索引
+</code></pre>
+<p><em>对于一些系统其物理内存的起始地址并不是 0，PFN 与第一个页框之间存在一个偏移量 ARCH_PFN_OFFSET， 这里不做过多赘述，对于上述 Example，ARCH_PFN_OFFSET=0.</em></p>
+<h1 id="sparsemem-稀疏内存模型">SPARSEMEM 稀疏内存模型</h1>
+<p>稀疏内存模型使用更灵活的管理方式，其核心思想就是对粒度更小的连续内存块进行精细的管理。</p>
+<p>唯一支持以下特性的模型：</p>
+<ul>
+<li>hot-plug</li>
+<li>hot-remove</li>
+<li>alternative memory maps for non-volatile memory device</li>
+<li>deferred initialization of the memory map for larger systems.</li>
+</ul>
+<h2 id="基本思想-1">基本思想</h2>
+<ul>
+<li>将物理内存划分为若干<strong>段</strong>，每个段由 <code>struct mem_section</code> 表示</li>
+<li>每个段包含一个 <code>section_mem_map</code>，逻辑上指向一个 <code>sturct page</code> <strong>数组</strong></li>
+<li>每个段可以包含的 <code>struct page</code> 数量由 <code>SECTION_SIZE_BITS</code> 决定</li>
+<li>所有的段 <code>struct mem_section</code> 被组织在一个指针数组 <code>mem_section</code> 中</li>
+</ul>
+<pre><code>struct mem_section {
+... 
+unsigned long section_mem_map; // struct page array pointer However, it is stored with some other magic.
+...
+}
+</code></pre>
+<pre><code>/*
+ * Permanent SPARSEMEM data:
+ *
+ * 1) mem_section	- memory sections, mem_map's for valid memory
+ */
+#ifdef CONFIG_SPARSEMEM_EXTREME
+struct mem_section **mem_section;
+#else
+struct mem_section mem_section[NR_SECTION_ROOTS][SECTIONS_PER_ROOT]
+	____cacheline_internodealigned_in_smp;
+#endif
+EXPORT_SYMBOL(mem_section);
+</code></pre>
+<pre><code>include/linux/mmzone.h
+#define PFN_SECTION_SHIFT       (SECTION_SIZE_BITS - PAGE_SHIFT)
+#define PAGES_PER_SECTION       (1UL &lt;&lt; PFN_SECTION_SHIFT)
+</code></pre>
+<p><strong>Example</strong> <em>PAGE_SIZE 4KB 的 Linux 系统</em></p>
+<p><img src="https://img.jaxwang.top/2025/04/fdda9f44385a4f7f2a896762576dc212.png" alt=""></p>
+<p>当物理地址空间中出现 <code>128MB</code> 空洞时，并且这 <code>128MB</code> 空洞是与 128MB 对齐的就可以减少这部分的 <code>struct page</code> 分配而节省内存。</p>
+<h2 id="pfn---struct-page-1">PFN &lt;-&gt; struct page</h2>
+<p><a href="https://docs.kernel.org/mm/memory-model.html#:~:text=With%20SPARSEMEM%20there%20are%20two%20possible%20ways%20to%20convert%20a%20PFN%20to%20the%20corresponding%20struct%20page">ref</a></p>
+<h2 id="init">INIT</h2>
+<pre><code>setup_arch()
+x86_init.paging.pagetable_init()
+native_pagetable_init()
+paging_init()
+sparse_init()
+</code></pre>
+<p><em>mm/sparse.c</em></p>
+<pre><code>/*
+ * Allocate the accumulated non-linear sections, allocate a mem_map
+ * for each and record the physical to section mapping.
+ */
+void __init sparse_init(void)
+{
+	unsigned long pnum_end, pnum_begin, map_count = 1;
+	int nid_begin;
+
+	/* see include/linux/mmzone.h 'struct mem_section' definition */
+	BUILD_BUG_ON(!is_power_of_2(sizeof(struct mem_section)));
+	memblocks_present(); // 根据 memory blocks malloc struct mem_section, 暂不 malloc struct page
+
+	pnum_begin = first_present_section_nr();
+	nid_begin = sparse_early_nid(__nr_to_section(pnum_begin));
+
+	/* Setup pageblock_order for HUGETLB_PAGE_SIZE_VARIABLE */
+	set_pageblock_order();
+
+	for_each_present_section_nr(pnum_begin + 1, pnum_end) {
+		int nid = sparse_early_nid(__nr_to_section(pnum_end));
+
+		if (nid == nid_begin) {
+			map_count++;
+			continue;
+		}
+		/* Init node with sections in range [pnum_begin, pnum_end) */
+		sparse_init_nid(nid_begin, pnum_begin, pnum_end, map_count);  // 遍历所有 section 并根据 node id 分组 init, malloc struct page.
+		nid_begin = nid;
+		pnum_begin = pnum_end;
+		map_count = 1;
+	}
+	/* cover the last node */
+	sparse_init_nid(nid_begin, pnum_begin, pnum_end, map_count);
+	vmemmap_populate_print_last();
+}
+
+</code></pre>
+<h1 id="ref">Ref</h1>
+<p><a href="https://docs.kernel.org/mm/memory-model.html">https://docs.kernel.org/mm/memory-model.html</a>
+<a href="https://www.cnblogs.com/binlovetech/p/16914715.html">https://www.cnblogs.com/binlovetech/p/16914715.html</a></p>
+
+</main>
+<hr/>
+
+<script src="https://giscus.app/client.js"
+        data-repo="JaxWang28/Blog"
+        data-repo-id="R_kgDOIbrexg"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOIbrexs4CSjN8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+  <footer>
+  <hr/>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+
+<div class="busuanzi-footer">
+  <span id="busuanzi_container_site_pv">
+    总访问量 <span id="busuanzi_value_site_pv"></span> 次
+  </span>
+  <span id="busuanzi_container_site_uv">
+    访客数 <span id="busuanzi_value_site_uv"></span> 人次
+  </span>
+</div>
+  
+  <hr/>
+  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2017 &ndash; 2025 | <a href="https://github.com/jaxwang28">Github</a>
+  
+  </footer>
+  </body>
+</html>
+

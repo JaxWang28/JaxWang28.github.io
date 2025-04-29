@@ -6,8 +6,22 @@
     <description>Recent content in Home on Jackson Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 26 Apr 2025 14:37:06 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 29 Apr 2025 16:30:00 +0800</lastBuildDate>
     <atom:link href="https://blog.jaxwang.top/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux - 内存管理 - 物理内存模型</title>
+      <link>https://blog.jaxwang.top/p/linux-memory-physical-memory-model/</link>
+      <pubDate>Tue, 29 Apr 2025 16:30:00 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/p/linux-memory-physical-memory-model/</guid>
+      <description>&lt;p&gt;4GB RAM 4KB 页面大小的 Linux 系统会产生一百万之多的 &lt;code&gt;struct page&lt;/code&gt;，组织管理这些结构体的方式我们称为内存模型。Linux 目前支持两种模型：&lt;code&gt;FLATMEM&lt;/code&gt; &lt;code&gt;SPARSEMEM&lt;/code&gt;。&lt;/p&gt;&#xA;&lt;p&gt;无论选择哪个内存模型，都会通过&lt;strong&gt;一个或多个数组&lt;/strong&gt;管理 &lt;code&gt;struct page&lt;/code&gt;。&lt;/p&gt;&#xA;&lt;h1 id=&#34;内存空洞-memory-hole&#34;&gt;内存空洞 memory hole&lt;/h1&gt;&#xA;&lt;p&gt;事实上 RAM 只是物理地址空间的一部分，物理地址空间通常会出现一部分地址是不用做普通内存使用的，对于这地址我们称之为&lt;strong&gt;内存空洞 Memory Hole&lt;/strong&gt;。&lt;/p&gt;&#xA;&lt;p&gt;使用 &lt;code&gt;qemu-system-x86_64 -m 8G &lt;/code&gt; 启动 Kernel，可以看到下面 log&lt;/p&gt;&#xA;&lt;pre&gt;&lt;code&gt;[    0.000000] BIOS-provided physical RAM map:&#xA;[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009fbff] usable&#xA;[    0.000000] BIOS-e820: [mem 0x000000000009fc00-0x000000000009ffff] reserved&#xA;[    0.000000] BIOS-e820: [mem 0x00000000000f0000-0x00000000000fffff] reserved&#xA;[    0.000000] BIOS-e820: [mem 0x0000000000100000-0x00000000bffdffff] usable&#xA;[    0.000000] BIOS-e820: [mem 0x00000000bffe0000-0x00000000bfffffff] reserved&#xA;[    0.000000] BIOS-e820: [mem 0x00000000fffc0000-0x00000000ffffffff] reserved&#xA;[    0.000000] BIOS-e820: [mem 0x0000000100000000-0x000000023fffffff] usable&#xA;[    0.000000] BIOS-e820: [mem 0x000000fd00000000-0x000000ffffffffff] reserved&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&lt;p&gt;对于其中 &lt;code&gt;reserved&lt;/code&gt; 的部分是不可作为普通内存使用的。&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Linux - 内存管理 - 页描述符</title>
+      <link>https://blog.jaxwang.top/p/linux-memory-page-descriptor/</link>
+      <pubDate>Tue, 29 Apr 2025 16:25:00 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/p/linux-memory-page-descriptor/</guid>
+      <description>&lt;p&gt;Linux 使用分页技术，因此对物理内存管理的基本单位是 &lt;strong&gt;Page Frame 页框&lt;/strong&gt;。Linux 必须对每一个 Page Frame 了如执掌，其通过为每个页框分配一个&lt;strong&gt;页描述符&lt;/strong&gt; &lt;code&gt;struct page&lt;/code&gt; 保存页框的基本信息。&lt;/p&gt;&#xA;&lt;p&gt;对于一个物理地址空间 4GB PAGE_SIZE=4KB Linux 系统，Linux 分配 &lt;code&gt;4GB/4KB = 1M = 2^20&lt;/code&gt; 大约一百万个 &lt;code&gt;struct page&lt;/code&gt; 结构体，尽管这是个庞大的数量，但这是不可避免的。&lt;/p&gt;&#xA;&lt;p&gt;这里我们可以得到一个对应关系:&#xA;&lt;img src=&#34;https://img.jaxwang.top/2025/04/b5b82570c1935e7949d19886729d2a67.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;Linux 中定义了两个宏进行 PFN 与 &lt;code&gt;struct page&lt;/code&gt; 之间的转换：&lt;/p&gt;&#xA;&lt;pre&gt;&lt;code&gt;page_to_pfn&#xA;pfn_to_page&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&lt;p&gt;这两个宏的具体实现依赖于 Linux 使用的物理内存模型，将在后文展开。&lt;/p&gt;&#xA;&lt;p&gt;&lt;em&gt;include/linux/mm_types.h&lt;/em&gt;&lt;/p&gt;&#xA;&lt;pre&gt;&lt;code&gt;/*&#xA; * Each physical page in the system has a struct page associated with&#xA; * it to keep track of whatever it is we are using the page for at the&#xA; * moment. Note that we have no way to track which tasks are using&#xA; * a page, though if it is a pagecache page, rmap structures can tell us&#xA; * who is mapping it.&#xA; */&#xA;struct page {&#xA;    ...&#xA;    unsigned long flags;&#xA;    ...&#x9;&#xA;} _struct_page_alignment;&#xA;&lt;/code&gt;&lt;/pre&gt;</description>
+    </item>
     <item>
       <title>Linux - 内存管理 - 分页虚拟存储理论</title>
       <link>https://blog.jaxwang.top/p/linux-memory-paging-fundamental/</link>

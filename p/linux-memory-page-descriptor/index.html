@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Kernel | Jackson Blog</title>
+    <title>Linux - 内存管理 - 页描述符 | Jackson Blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     
@@ -51,54 +51,59 @@
     <hr/>
     </nav>
 
+<div class="article-meta">
+<h1><span class="title">Linux - 内存管理 - 页描述符</span></h1>
 
+<h2 class="date">
+ 2025/04/29 
+&nbsp
+<span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>次阅读量</span>
+</h2>
+</div>
 
-<h1>Kernel</h1>
+<main>
+<p>Linux 使用分页技术，因此对物理内存管理的基本单位是 <strong>Page Frame 页框</strong>。Linux 必须对每一个 Page Frame 了如执掌，其通过为每个页框分配一个<strong>页描述符</strong> <code>struct page</code> 保存页框的基本信息。</p>
+<p>对于一个物理地址空间 4GB PAGE_SIZE=4KB Linux 系统，Linux 分配 <code>4GB/4KB = 1M = 2^20</code> 大约一百万个 <code>struct page</code> 结构体，尽管这是个庞大的数量，但这是不可避免的。</p>
+<p>这里我们可以得到一个对应关系:
+<img src="https://img.jaxwang.top/2025/04/b5b82570c1935e7949d19886729d2a67.png" alt=""></p>
+<p>Linux 中定义了两个宏进行 PFN 与 <code>struct page</code> 之间的转换：</p>
+<pre><code>page_to_pfn
+pfn_to_page
+</code></pre>
+<p>这两个宏的具体实现依赖于 Linux 使用的物理内存模型，将在后文展开。</p>
+<p><em>include/linux/mm_types.h</em></p>
+<pre><code>/*
+ * Each physical page in the system has a struct page associated with
+ * it to keep track of whatever it is we are using the page for at the
+ * moment. Note that we have no way to track which tasks are using
+ * a page, though if it is a pagecache page, rmap structures can tell us
+ * who is mapping it.
+ */
+struct page {
+    ...
+    unsigned long flags;
+    ...	
+} _struct_page_alignment;
+</code></pre>
 
+</main>
+<hr/>
 
-
-
-<ul>
-  
-  
-  
-  <li>
-    <span class="date">2025/04/29</span>
-    <a href="/p/linux-memory-physical-memory-model/">Linux - 内存管理 - 物理内存模型</a>
-  </li>
-  
-  <li>
-    <span class="date">2025/04/29</span>
-    <a href="/p/linux-memory-page-descriptor/">Linux - 内存管理 - 页描述符</a>
-  </li>
-  
-  <li>
-    <span class="date">2025/04/26</span>
-    <a href="/p/linux-memory-paging-fundamental/">Linux - 内存管理 - 分页虚拟存储理论</a>
-  </li>
-  
-  <li>
-    <span class="date">2025/04/20</span>
-    <a href="/p/linux-progress-taskstruct-state/">Linux - 进程管理 - 进程描述符 - state</a>
-  </li>
-  
-  <li>
-    <span class="date">2025/04/20</span>
-    <a href="/p/x86-linux-kernet-boot-setup/">x86 Linux 启动第二阶段 - protected mode</a>
-  </li>
-  
-  <li>
-    <span class="date">2025/04/19</span>
-    <a href="/p/x86-linux-kernet-boot-setup/">x86 Linux 启动第一阶段 - setup</a>
-  </li>
-  
-  <li>
-    <span class="date">2024/08/14</span>
-    <a href="/p/wsl2-kernel-update/">WSL2 Kernel 升级更换</a>
-  </li>
-  
-</ul>
-
+<script src="https://giscus.app/client.js"
+        data-repo="JaxWang28/Blog"
+        data-repo-id="R_kgDOIbrexg"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOIbrexs4CSjN8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
   <footer>
   <hr/>
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
