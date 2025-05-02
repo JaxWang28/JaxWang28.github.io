@@ -6,8 +6,15 @@
     <description>Recent content in Home on Jackson Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 29 Apr 2025 16:30:00 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 30 Apr 2025 15:07:00 +0800</lastBuildDate>
     <atom:link href="https://blog.jaxwang.top/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux - 数据结构 - list</title>
+      <link>https://blog.jaxwang.top/p/linux-data-structure-list/</link>
+      <pubDate>Wed, 30 Apr 2025 15:07:00 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/p/linux-data-structure-list/</guid>
+      <description>&lt;p&gt;Linux 中实现了双向循环链表，和 hash 链表。&lt;/p&gt;&#xA;&lt;h1 id=&#34;0x01-双向链表-list_head&#34;&gt;0x01 双向链表 list_head&lt;/h1&gt;&#xA;&lt;p&gt;Linux 使用了最简洁的方式实现了一个几乎是万能的链表，其通过将下面结构体嵌入到其他结构体中，实现双向循环链表。在 &lt;code&gt;include/linux/list.h&lt;/code&gt; 定义了支持的所有操作。&lt;/p&gt;&#xA;&lt;p&gt;&lt;em&gt;include/linux/types.h&lt;/em&gt;&lt;/p&gt;&#xA;&lt;pre&gt;&lt;code&gt;struct list_head {&#xA;&#x9;struct list_head *next, *prev;&#xA;};&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&lt;p&gt;&lt;strong&gt;Example&lt;/strong&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;em&gt;mm/slab_common.c&lt;/em&gt;&lt;/p&gt;&#xA;&lt;pre&gt;&lt;code&gt;LIST_HEAD(slab_caches);&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&lt;p&gt;&lt;em&gt;mm/slab.h&lt;/em&gt;&lt;/p&gt;&#xA;&lt;pre&gt;&lt;code&gt;struct kmem_cache {&#xA;    ....&#xA;    struct list_head list;&#x9;&#x9;/* List of slab caches */&#xA;    ....&#xA;}&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2025/04/c8590fa84ab49e876bb5296f2dc13712.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;从上面的例子中，指针指向的都是 &lt;code&gt;struct kmem_cache&lt;/code&gt; 中 &lt;code&gt;list&lt;/code&gt; 成员的地址，如何通过这个成员获得 &lt;code&gt;struct kmem_cache&lt;/code&gt; 的地址，在 Linux 中称为 &lt;code&gt;list_entry&lt;/code&gt; 的操作，通过下面代码实现：&lt;/p&gt;&#xA;&lt;p&gt;&lt;em&gt;include/linux/list.h&lt;/em&gt;&lt;/p&gt;&#xA;&lt;pre&gt;&lt;code&gt;/**&#xA; * list_entry - get the struct for this entry&#xA; * @ptr:&#x9;the &amp;amp;struct list_head pointer.&#xA; * @type:&#x9;the type of the struct this is embedded in.&#xA; * @member:&#x9;the name of the list_head within the struct.&#xA; */&#xA;#define list_entry(ptr, type, member) \&#xA;&#x9;container_of(ptr, type, member)&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&lt;p&gt;&lt;em&gt;include/linux/container_of.h&lt;/em&gt;&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Linux - 内存管理 - 物理内存模型</title>
       <link>https://blog.jaxwang.top/p/linux-memory-physical-memory-model/</link>
