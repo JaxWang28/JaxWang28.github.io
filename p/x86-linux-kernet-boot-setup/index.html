@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>x86 Linux 启动第二阶段 - protected mode | Jackson Blog</title>
+    <title>x86 Linux 启动第一阶段 - setup | Jackson Blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     
@@ -52,61 +52,82 @@
     </nav>
 
 <div class="article-meta">
-<h1><span class="title">x86 Linux 启动第二阶段 - protected mode</span></h1>
+<h1><span class="title">x86 Linux 启动第一阶段 - setup</span></h1>
 
 <h2 class="date">
- 2025/04/20 
+ 2025/04/19 
 &nbsp
 <span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>次阅读量</span>
 </h2>
 </div>
 
 <main>
-<p>bootloader 在将 kernel 加载到 <code>0x100000</code> 后设置 <code>boot_params.hdr.code32_start</code> ，这个地址 <code>protected_mode</code> 内核的开始地址即 <code>0x100000</code>。</p>
-<pre><code>(gdb) x/32x 0x100000
-0x100000:       0xfc    0xfa    0x8d    0xa6    0xe8    0x01    0x00    0x00
-0x100008:       0xe8    0x00    0x00    0x00    0x00    0x5d    0x83    0xed
+<pre><code>linux-6.12.4
+QEMU emulator version 8.2.2 (Debian 1:8.2.2+ds-0ubuntu1.6)
+</code></pre>
+<h1 id="魔数-mz">魔数 MZ</h1>
+<pre><code>readelf -x .bstext  arch/x86/boot/setup.elf
+Hex dump of section '.bstext':
+0x00000000 4d5a0000 00000000 00000000 00000000 MZ..............
+</code></pre>
+<pre><code>xxd arch/x86/boot/setup.bin
+00000000: 4d5a 0000 0000 0000 0000 0000 0000 0000  MZ..............
+00000010: 0000 0000 0000 0000 0000 0000 0000 0000  ................
+</code></pre>
+<pre><code>(gdb) hb *0x10200
+(gdb) c
+(gdb) x/2c 0x10000
+0x10000 &lt;exception_stacks+16384&gt;:       77 'M'  90 'Z'
+</code></pre>
+<h1 id="setup-过程函数跳转">setup 过程函数跳转</h1>
+<p><img src="https://img.jaxwang.top/2025/04/1ea16f28231769c5f553393cfd522178.png" alt=""></p>
+<h1 id="_start">_start</h1>
+<p>bootloader 将 <code>setup.bin</code> 加载到 <code>0x10000</code> 地址处后，将 <code>CS</code> 置为 <code>0x1020</code> ，<code>IP</code> 置为 <code>0x0</code>。通过计算可以得知地址为 <code>0x10200</code>。</p>
+<pre><code>nm arch/x86/boot/setup.elf  | grep 200
+00000200 a falign
+00000200 R _start
+</code></pre>
+<pre><code>arch/x86/boot/header.S
+        # offset 512, entry point
 
-readelf -x .head.text arch/x86/boot/compressed/vmlinux
-0x00000000 fcfa8da6 e8010000 e8000000 005d83ed .............]..
-0x00000010 0d8d8510 f0c90089 40020f01 10b81800 ........@.......
+        .globl  _start
+_start:
+                # Explicitly enter this as bytes, or the assembler
+                # tries to generate a 3-byte jump here, which causes
+                # everything else to push off to the wrong offset.
+                .byte   0xeb            # short (2-byte) jump
+                .byte   start_of_setup-1f
+1:
+// start_of_setup -1f is offset 
+// 0xeb is short jump, 0xeb &lt;offset&gt;
 </code></pre>
-<h1 id="第一张全局描述符表-gdt">第一张全局描述符表 GDT</h1>
-<pre><code>SYM_DATA_START_LOCAL(gdt)
-        .word   gdt_end - gdt - 1
-        .long   0
-        .word   0
-        .quad   0x00cf9a000000ffff      /* __KERNEL32_CS */
-        .quad   0x00af9a000000ffff      /* __KERNEL_CS */
-        .quad   0x00cf92000000ffff      /* __KERNEL_DS */
-        .quad   0x0080890000000000      /* TS descriptor */
-        .quad   0x0000000000000000      /* TS continued */
-SYM_DATA_END_LABEL(gdt, SYM_L_LOCAL, gdt_end)
+<p>通过源码可知，进入 <code>0x10200</code> 后，跳转到 <code>start_of_setup</code> 处。</p>
+<h1 id="start_of_setup">start_of_setup</h1>
+<ul>
+<li>初始化寄存器状态</li>
+<li>准备堆栈</li>
+<li>跳转到 <code>main</code></li>
+</ul>
+<h1 id="main">main</h1>
+<ul>
+<li>各种方面的初始化</li>
+</ul>
+<h1 id="go_to_protected_mode">go_to_protected_mode</h1>
+<ul>
+<li>为 <code>protected_mode</code> 做准备</li>
+</ul>
+<h1 id="protected_mode_jump">protected_mode_jump</h1>
+<ul>
+<li>通过汇编跳转到 <code>protected_mode</code></li>
+</ul>
+<pre><code>jmpl    *%eax                   # Jump to the 32-bit entrypoint
+
+// 这里的 eax 是 C 语言调用的第一个参数，在 pm.c 中可以找到参数为 boot_param.hdr.code32_start
 </code></pre>
-<p><img src="https://img.jaxwang.top/2025/04/441e0ef44d4aa8bef05b2ab190446907.png" alt=""></p>
-<p>我们会发现每个段的基地址都是 <code>0x0</code>，这意味着在 Linux 下逻辑地址与线性地址是一致的。换而言之，<strong>Linux 并没有使用 x86 提供的分段机制</strong>。
-<em>事实上，分段和分页在某种程度上有点多余，它们都能划分物理空间。</em></p>
-<h1 id="early-4g-boot-pagetable">early 4G boot pagetable</h1>
-<p><img src="https://img.jaxwang.top/2025/04/2d2c22c6ff14db80a66ab00413d57861.png" alt=""></p>
 
 </main>
 <hr/>
 
-<script src="https://giscus.app/client.js"
-        data-repo="JaxWang28/Blog"
-        data-repo-id="R_kgDOIbrexg"
-        data-category="Announcements"
-        data-category-id="DIC_kwDOIbrexs4CSjN8"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="bottom"
-        data-theme="light"
-        data-lang="zh-CN"
-        crossorigin="anonymous"
-        async>
-</script>
   <footer>
   <hr/>
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
