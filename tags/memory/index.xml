@@ -6,8 +6,15 @@
     <description>Recent content in Memory on Jackson Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 29 Apr 2025 16:30:00 +0800</lastBuildDate>
+    <lastBuildDate>Wed, 07 May 2025 20:25:00 +0800</lastBuildDate>
     <atom:link href="https://blog.jaxwang.top/tags/memory/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux - 内存管理 - NUMA ZONE</title>
+      <link>https://blog.jaxwang.top/p/linux-memory-numa-zone-page/</link>
+      <pubDate>Wed, 07 May 2025 20:25:00 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/p/linux-memory-numa-zone-page/</guid>
+      <description>&lt;h1 id=&#34;0x01-numa-non-uniform-memory-access-概述&#34;&gt;0x01 NUMA Non-Uniform Memory Access 概述&lt;/h1&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2025/04/54d2c03b18a4e0eab8c71c100f7a820f.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h2 id=&#34;单处理器时代&#34;&gt;单处理器时代&lt;/h2&gt;&#xA;&lt;p&gt;单核时代，CPU 与内存之间的关系是简单的。CPU 通过前端总线（FSB, Front Side Bus）连接到北桥芯片（集成内存控制器），北桥芯片连接到内存。&#xA;&lt;img src=&#34;https://img.jaxwang.top/2025/04/f49b62a3a29bc162d11b5bf6e1851693.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h2 id=&#34;多处理器时代&#34;&gt;多处理器时代&lt;/h2&gt;&#xA;&lt;p&gt;随着 CPU 的频率提高出现瓶颈，开始向多核发展。 出现了对称多处理器系统，多个 CPU 共享同一个内存池，通过总线 Bus 相连。每个 CPU 访问内存所需时间相同。这种架构称为 &lt;strong&gt;Uniform-memory-Access UMA&lt;/strong&gt;。使用总线就会存在资源争用和一致性问题，随着 CPU 数量增多争用愈演愈烈，以至于 4 核 CPU 性能达不到 2 核 1.5 倍。&lt;/p&gt;&#xA;&lt;p&gt;放弃总线的访问方式，将 CPU 划分到多个 Node 中，每个 Node 有自己独立的内存空间。各个 Node 之间通过高速互联通讯，通讯通道被成为QuickPath Interconnect 即 QPI。&lt;/p&gt;&#xA;&lt;p&gt;这种架构模型，cpu访问本地内存与远程内存所用的时间是不一样的，一般访问本地内存要比访问远程内存快，因此也被称做非一致或非均匀内存访问模型(Nonuniform-Memory-Access, 简称NUMA)。在 NUMA 中，每个 CPU（或 CPU 组）有自己的本地内存，同时也可以访问其他 CPU 的远程内存，但远程访问的延迟更高。&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2025/04/3da9e0613ee79b63f12ab97135bac08d.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;em&gt;一颗 CPU 一定在一个 Node 中。一个 Node 可以包含多颗 CPU。&lt;/em&gt;&lt;/p&gt;&#xA;&lt;h1 id=&#34;0x02-pg_data_t&#34;&gt;0x02 pg_data_t&lt;/h1&gt;&#xA;&lt;p&gt;Linux 在 2.6.7 版本引入 NUMA，并作为 Linux 物理内存管理的第一原则。这就意味着即使系统架构为 UMA 架构，Linux 也会将其视为 NUMA，只不过是只有一个 Node 的 NUMA 架构。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Linux - 内存管理 - 物理内存模型</title>
       <link>https://blog.jaxwang.top/p/linux-memory-physical-memory-model/</link>

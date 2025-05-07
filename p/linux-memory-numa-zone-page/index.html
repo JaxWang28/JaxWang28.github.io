@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Linux - 内存管理 - NUMA ZONE | Jackson Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '7S26TLKGMX');
+        }
+      </script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/post/">Posts</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/about/">About</a></li>
+      
+      <li><a href="/">RSS</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">Linux - 内存管理 - NUMA ZONE</span></h1>
+
+<h2 class="date">
+ 2025/05/07 
+&nbsp
+<span id="busuanzi_container_page_pv"><span id="busuanzi_value_page_pv"></span>次阅读量</span>
+</h2>
+</div>
+
+<main>
+<h1 id="0x01-numa-non-uniform-memory-access-概述">0x01 NUMA Non-Uniform Memory Access 概述</h1>
+<p><img src="https://img.jaxwang.top/2025/04/54d2c03b18a4e0eab8c71c100f7a820f.png" alt=""></p>
+<h2 id="单处理器时代">单处理器时代</h2>
+<p>单核时代，CPU 与内存之间的关系是简单的。CPU 通过前端总线（FSB, Front Side Bus）连接到北桥芯片（集成内存控制器），北桥芯片连接到内存。
+<img src="https://img.jaxwang.top/2025/04/f49b62a3a29bc162d11b5bf6e1851693.png" alt=""></p>
+<h2 id="多处理器时代">多处理器时代</h2>
+<p>随着 CPU 的频率提高出现瓶颈，开始向多核发展。 出现了对称多处理器系统，多个 CPU 共享同一个内存池，通过总线 Bus 相连。每个 CPU 访问内存所需时间相同。这种架构称为 <strong>Uniform-memory-Access UMA</strong>。使用总线就会存在资源争用和一致性问题，随着 CPU 数量增多争用愈演愈烈，以至于 4 核 CPU 性能达不到 2 核 1.5 倍。</p>
+<p>放弃总线的访问方式，将 CPU 划分到多个 Node 中，每个 Node 有自己独立的内存空间。各个 Node 之间通过高速互联通讯，通讯通道被成为QuickPath Interconnect 即 QPI。</p>
+<p>这种架构模型，cpu访问本地内存与远程内存所用的时间是不一样的，一般访问本地内存要比访问远程内存快，因此也被称做非一致或非均匀内存访问模型(Nonuniform-Memory-Access, 简称NUMA)。在 NUMA 中，每个 CPU（或 CPU 组）有自己的本地内存，同时也可以访问其他 CPU 的远程内存，但远程访问的延迟更高。</p>
+<p><img src="https://img.jaxwang.top/2025/04/3da9e0613ee79b63f12ab97135bac08d.png" alt=""></p>
+<p><em>一颗 CPU 一定在一个 Node 中。一个 Node 可以包含多颗 CPU。</em></p>
+<h1 id="0x02-pg_data_t">0x02 pg_data_t</h1>
+<p>Linux 在 2.6.7 版本引入 NUMA，并作为 Linux 物理内存管理的第一原则。这就意味着即使系统架构为 UMA 架构，Linux 也会将其视为 NUMA，只不过是只有一个 Node 的 NUMA 架构。</p>
+<p>Linux 使用 <code>struct pglist_data</code> 描述一个 Node 上的内存。可以通过 <code>NODE_DATA(nid)</code> 宏找到指定 <code>nid</code> 对应的 <code>pglist_data</code>。</p>
+<p><em>include/linux/mmzone.h</em></p>
+<pre><code>/*
+ * On NUMA machines, each NUMA node would have a pg_data_t to describe
+ * it's memory layout. On UMA machines there is a single pglist_data which
+ * describes the whole memory.
+ *
+ * Memory statistics and page replacement data structures are maintained on a
+ * per-zone basis.
+ */
+typedef struct pglist_data {
+    ....
+} pg_data_t;
+</code></pre>
+<p><em>这里并不是真正管理物理内存的 struct page, stuct page 由物理内存模型管理，pglist_data 巧妙的使用了 list 这个词，意在只是引用。</em></p>
+<p>对于 UMA 架构，Linux 只会创建一个 <code>struct pglist_data</code>，其变量名为 <code>contig_page_data</code>。</p>
+<p><em>mm/memblock.c</em></p>
+<pre><code>#ifndef CONFIG_NUMA
+struct pglist_data __refdata contig_page_data;
+EXPORT_SYMBOL(contig_page_data);
+#endif
+</code></pre>
+<p>在分配物理页时，Linux 默认采用“节点本地”策略：优先从距离当前 CPU 最近的节点上分配内存。因为进程往往长期运行在同一颗 CPU 上，所以通常会使用该 CPU 所在节点的内存。若需要，也可以按“NUMA 内存策略”文档所述，由用户显式控制分配策略。</p>
+<h1 id="0x03-zone">0x03 zone</h1>
+<p>在<strong>理想</strong>的计算机系统中，一个页框就是一个基本存储单元，可以用来存放数据代码，任意一个页框的使用都没有限制。但事实并非如此。受限于计算机体系结构的硬件制约和某些新特性（<em>TODO</em>），页框的使用方式也得到了限制。</p>
+<p><em>include/linux/mmzone.h</em></p>
+<pre><code>struct zone {
+	...
+	struct pglist_data	*zone_pgdat;
+	...
+}
+</code></pre>
+<p><em>include/linux/mmzone.h</em></p>
+<pre><code>enum zone_type {
+#ifdef CONFIG_ZONE_DMA
+	ZONE_DMA,
+#endif
+#ifdef CONFIG_ZONE_DMA32
+	ZONE_DMA32,
+#endif
+	ZONE_NORMAL,
+#ifdef CONFIG_HIGHMEM
+	ZONE_HIGHMEM,
+#endif
+	ZONE_MOVABLE,
+#ifdef CONFIG_ZONE_DEVICE
+	ZONE_DEVICE,
+#endif
+	__MAX_NR_ZONES
+};
+</code></pre>
+<p><strong>ZONE 分类</strong>：</p>
+<ul>
+<li>
+<p><strong>ZONE_DMA</strong> 和 <strong>ZONE_DMA32</strong>：<br>
+这两个 zone 在历史上用于表示可供<strong>外设设备</strong>进行 DMA 访问的内存，<br>
+这些设备无法访问整个物理内存地址空间。<br>
+虽然多年以后出现了更好、更健壮的接口（如基于通用设备的动态 DMA 映射），<br>
+但 <strong>ZONE_DMA</strong> 和 <strong>ZONE_DMA32</strong> 仍然用于表示那些访问受限的内存范围。<br>
+根据不同架构，<strong>可以在编译时</strong>（build time）通过配置选项 <strong>CONFIG_ZONE_DMA</strong> 和 <strong>CONFIG_ZONE_DMA32</strong> 禁用其中之一或两者。<br>
+某些 64 位平台可能需要同时启用这两个 zone，因为它们支持不同 DMA 地址限制的外设。</p>
+</li>
+<li>
+<p><strong>ZONE_NORMAL</strong>：<br>
+表示常规内存，内核可以随时访问。<br>
+如果 DMA 设备可以访问全部地址空间，DMA 操作也可以在此 zone 的页面上进行。<br>
+<strong>ZONE_NORMAL 总是启用的</strong>。</p>
+</li>
+<li>
+<p><strong>ZONE_HIGHMEM</strong>：<br>
+是物理内存中未在内核页表中永久映射的部分。<br>
+内核只能通过**临时映射（temporary mapping）**来访问这部分内存。<br>
+该 zone 仅出现在一些 32 位架构上，并且通过 <strong>CONFIG_HIGHMEM</strong> 配置项启用。</p>
+</li>
+<li>
+<p><strong>ZONE_MOVABLE</strong>：<br>
+也是常规可访问的内存，就像 <strong>ZONE_NORMAL</strong>。<br>
+不同之处在于，<strong>ZONE_MOVABLE</strong> 中大部分页面的内容是<strong>可移动的</strong>。<br>
+即，虽然这些页面的虚拟地址保持不变，但它们对应的物理页面内容可以迁移。<br>
+通常 <strong>ZONE_MOVABLE</strong> 在内存热插拔（memory hotplug）时被填充，<br>
+也可以在系统启动时通过内核命令行参数（如 <code>kernelcore</code>、<code>movablecore</code>、<code>movable_node</code>）进行配置。<br>
+详情可参考页面迁移（Page migration）和内存热插拔（Memory Hot(Un)Plug）章节。</p>
+</li>
+<li>
+<p><strong>ZONE_DEVICE</strong>：<br>
+表示驻留在设备（如 PMEM 持久内存设备或 GPU 显存）上的内存。<br>
+它与传统 RAM 区域类型有不同的特性，存在的目的是为设备驱动标识的物理地址范围提供 <code>struct page</code> 和内存映射（memory map）服务。<br>
+<strong>ZONE_DEVICE</strong> 通过配置选项 <strong>CONFIG_ZONE_DEVICE</strong> 启用。</p>
+</li>
+</ul>
+<p>特别需要注意的是，很多内核操作只能在 <strong>ZONE_NORMAL</strong> 中进行，因此 <strong>ZONE_NORMAL 是性能最关键的内存区域</strong>。</p>
+<h1 id="0x04-node-zone-page-组织结构">0x04 Node Zone Page 组织结构</h1>
+<p><img src="https://img.jaxwang.top/2025/05/ec28f3a25fc0fc066700823373ab4d8c.png" alt=""></p>
+<p><em>include/linux/mmzone.h</em></p>
+<pre><code>typedef struct pglist_data {
+	...
+	/*
+	 * node_zones contains just the zones for THIS node. Not all of the
+	 * zones may be populated, but it is the full list. It is referenced by
+	 * this node's node_zonelists as well as other node's node_zonelists.
+	 */
+	struct zone node_zones[MAX_NR_ZONES];
+	...
+}
+
+struct zone {
+	...
+	struct per_cpu_pages	__percpu *per_cpu_pageset;
+
+	/* zone_start_pfn == zone_start_paddr &gt;&gt; PAGE_SHIFT */
+	unsigned long		zone_start_pfn;
+	unsigned long		spanned_pages;
+	
+	/* free areas of different sizes */
+	struct free_area	free_area[NR_PAGE_ORDERS];
+	...
+}
+
+struct free_area {
+	struct list_head	free_list[MIGRATE_TYPES];
+	unsigned long		nr_free;
+};
+
+struct per_cpu_pages {
+
+	short free_count;	/* consecutive free count */
+
+	/* Lists of pages, one per migrate type stored on the pcp-lists */
+	struct list_head lists[NR_PCP_LISTS];
+} ____cacheline_aligned_in_smp;
+</code></pre>
+<p>zone 里的空闲页要么位于 <code>Per-CPU Pageset(PCP)</code> 要么位于 该 zone 的 <code>全局空闲链表 free areas</code>。</p>
+
+</main>
+<hr/>
+
+<script src="https://giscus.app/client.js"
+        data-repo="JaxWang28/Blog"
+        data-repo-id="R_kgDOIbrexg"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOIbrexs4CSjN8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+
+  <footer>
+  <hr/>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+
+<div class="busuanzi-footer">
+  <span id="busuanzi_container_site_pv">
+    总访问量 <span id="busuanzi_value_site_pv"></span> 次
+  </span>
+  <span id="busuanzi_container_site_uv">
+    访客数 <span id="busuanzi_value_site_uv"></span> 人次
+  </span>
+</div>
+  
+  <hr/>
+  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2017 &ndash; 2025 | <a href="https://github.com/jaxwang28">Github</a>
+  
+  </footer>
+  </body>
+</html>
+
