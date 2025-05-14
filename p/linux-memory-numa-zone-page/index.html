@@ -6,6 +6,7 @@
     <title>Linux - 内存管理 - NUMA ZONE | Jackson Blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
+    <link rel="stylesheet" href="/css/github-markdown-light.css" />
     
 <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
@@ -61,7 +62,8 @@
 </h2>
 </div>
 
-<main>
+<div class="markdown-box">
+<main class="markdown-body">
 <h1 id="0x01-numa-non-uniform-memory-access-概述">0x01 NUMA Non-Uniform Memory Access 概述</h1>
 <p><img src="https://img.jaxwang.top/2025/04/54d2c03b18a4e0eab8c71c100f7a820f.png" alt=""></p>
 <h2 id="单处理器时代">单处理器时代</h2>
@@ -209,7 +211,9 @@ struct per_cpu_pages {
 <p>zone 里的空闲页要么位于 <code>Per-CPU Pageset(PCP)</code> 要么位于 该 zone 的 <code>全局空闲链表 free areas</code>。</p>
 
 </main>
-<hr/>
+</div>
+
+<br>
 
 <script src="https://giscus.app/client.js"
         data-repo="JaxWang28/Blog"

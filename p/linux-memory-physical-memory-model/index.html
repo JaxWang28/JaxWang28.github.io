@@ -6,6 +6,7 @@
     <title>Linux - 内存管理 - 物理内存模型 | Jackson Blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
+    <link rel="stylesheet" href="/css/github-markdown-light.css" />
     
 <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
@@ -61,7 +62,8 @@
 </h2>
 </div>
 
-<main>
+<div class="markdown-box">
+<main class="markdown-body">
 <p>4GB RAM 4KB 页面大小的 Linux 系统会产生一百万之多的 <code>struct page</code>，组织管理这些结构体的方式我们称为内存模型。Linux 目前支持两种模型：<code>FLATMEM</code> <code>SPARSEMEM</code>。</p>
 <p>无论选择哪个内存模型，都会通过<strong>一个或多个数组</strong>管理 <code>struct page</code>。</p>
 <h1 id="内存空洞-memory-hole">内存空洞 memory hole</h1>
@@ -194,7 +196,9 @@ void __init sparse_init(void)
 <a href="https://www.cnblogs.com/binlovetech/p/16914715.html">https://www.cnblogs.com/binlovetech/p/16914715.html</a></p>
 
 </main>
-<hr/>
+</div>
+
+<br>
 
 <script src="https://giscus.app/client.js"
         data-repo="JaxWang28/Blog"

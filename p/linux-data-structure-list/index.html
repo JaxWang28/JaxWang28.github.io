@@ -6,6 +6,7 @@
     <title>Linux - 数据结构 - list | Jackson Blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
+    <link rel="stylesheet" href="/css/github-markdown-light.css" />
     
 <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
@@ -61,7 +62,8 @@
 </h2>
 </div>
 
-<main>
+<div class="markdown-box">
+<main class="markdown-body">
 <p>Linux 中实现了双向循环链表，和 hash 链表。</p>
 <h1 id="0x01-双向链表-list_head">0x01 双向链表 list_head</h1>
 <p>Linux 使用了最简洁的方式实现了一个几乎是万能的链表，其通过将下面结构体嵌入到其他结构体中，实现双向循环链表。在 <code>include/linux/list.h</code> 定义了支持的所有操作。</p>
@@ -149,7 +151,9 @@ struct hlist_node {
 <p><a href="https://linux.laoqinren.net/kernel/hlist/">https://linux.laoqinren.net/kernel/hlist/</a></p>
 
 </main>
-<hr/>
+</div>
+
+<br>
 
 <script src="https://giscus.app/client.js"
         data-repo="JaxWang28/Blog"
