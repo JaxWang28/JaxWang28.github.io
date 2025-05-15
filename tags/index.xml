@@ -6,6 +6,28 @@
     <description>Recent content in Tags on Jackson Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
+    <lastBuildDate>Wed, 30 Apr 2025 15:07:00 +0800</lastBuildDate>
     <atom:link href="https://blog.jaxwang.top/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>DataStructure</title>
+      <link>https://blog.jaxwang.top/tags/datastructure/</link>
+      <pubDate>Wed, 30 Apr 2025 15:07:00 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/tags/datastructure/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Kernel</title>
+      <link>https://blog.jaxwang.top/tags/kernel/</link>
+      <pubDate>Wed, 30 Apr 2025 15:07:00 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/tags/kernel/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Linux</title>
+      <link>https://blog.jaxwang.top/tags/linux/</link>
+      <pubDate>Wed, 30 Apr 2025 15:07:00 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/tags/linux/</guid>
+      <description></description>
+    </item>
   </channel>
 </rss>
