@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Linux - 数据结构 - list | Jackson Blog</title>
+    <title>Linux Kernel 数据结构分析之链表 | Jackson Blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     <link rel="stylesheet" href="/css/github-markdown-light.css" />
@@ -63,30 +63,39 @@
 </div>
 <div class="markdown-box">
 <main class="markdown-body">
-<h1 id="linux-内核中链表的实现">Linux 内核中链表的实现</h1>
-<p>Linux 中实现了双向循环链表，和 hash 链表。</p>
-<h2 id="一双向链表-list_head">一、双向链表 list_head</h2>
-<p>Linux 使用了最简洁的方式实现了一个几乎是万能的链表，其通过将下面结构体嵌入到其他结构体中，实现双向循环链表。在 <code>include/linux/list.h</code> 定义了支持的所有操作。</p>
-<p><em>include/linux/types.h</em></p>
-<pre><code>struct list_head {
+<h1 id="linux-kernel-数据结构分析之链表">Linux Kernel 数据结构分析之链表</h1>
+<p>Linux Kernel 中实现了以下两种链表：</p>
+<ul>
+<li>双向循环链表</li>
+<li>hash 链表</li>
+</ul>
+<p>本文将分别分析两种链表的实现。</p>
+<h2 id="一双向循环链表">一、双向循环链表</h2>
+<p>Linux 使用了最简洁的方式实现了一个几乎是万能的链表，其通过将 <code>struct list_head</code> <strong>嵌入到其他结构体中</strong>，实现双向循环链表。并在 <code>include/linux/list.h</code> 定义了支持的所有操作。</p>
+<pre><code class="language-C">// include/linux/types.h
+
+struct list_head {
 	struct list_head *next, *prev;
 };
 </code></pre>
-<p><strong>Example</strong></p>
-<p><em>mm/slab_common.c</em></p>
-<pre><code>LIST_HEAD(slab_caches);
+<p>以 <code>keme_caches</code> 链表进行分析。</p>
+<pre><code>// mm/slab_common.c
+
+LIST_HEAD(slab_caches);
 </code></pre>
-<p><em>mm/slab.h</em></p>
-<pre><code>struct kmem_cache {
+<pre><code>// mm/slab.h
+
+struct kmem_cache {
     ....
     struct list_head list;		/* List of slab caches */
     ....
 }
 </code></pre>
-<p><img src="https://img.jaxwang.top/2025/04/c8590fa84ab49e876bb5296f2dc13712.png" alt=""></p>
-<p>从上面的例子中，指针指向的都是 <code>struct kmem_cache</code> 中 <code>list</code> 成员的地址，如何通过这个成员获得 <code>struct kmem_cache</code> 的地址，在 Linux 中称为 <code>list_entry</code> 的操作，通过下面代码实现：</p>
-<p><em>include/linux/list.h</em></p>
-<pre><code>/**
+<img src="https://img.jaxwang.top/2025/04/c8590fa84ab49e876bb5296f2dc13712.png" width="50%" height="50%">
+<p>上面的例子中，指针指向是 <code>struct kmem_cache</code> 中 <code>list</code> 成员。通过这个成员的地址获得 <code>struct kmem_cache</code> 的地址的操作，在 Linux 中通过 <code>list_entry</code> 实现。下面分析其实现逻辑。</p>
+<pre><code>// include/linux/list.h
+
+/**
  * list_entry - get the struct for this entry
  * @ptr:	the &amp;struct list_head pointer.
  * @type:	the type of the struct this is embedded in.
@@ -95,8 +104,9 @@
 #define list_entry(ptr, type, member) \
 	container_of(ptr, type, member)
 </code></pre>
-<p><em>include/linux/container_of.h</em></p>
-<pre><code>/**
+<pre><code>// include/linux/container_of.h
+
+/**
  * container_of - cast a member of a structure out to the containing structure
  * @ptr:	the pointer to the member.
  * @type:	the type of the container struct this is embedded in.
@@ -111,8 +121,9 @@
 		      &quot;pointer type mismatch in container_of()&quot;);	\
 	((type *)(__mptr - offsetof(type, member))); })
 </code></pre>
-<p><em>tools/include/linux/kernel.h</em></p>
-<pre><code>#ifndef offsetof
+<pre><code>// tools/include/linux/kernel.h
+
+#ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((size_t) &amp;((TYPE *)0)-&gt;MEMBER)
 #endif
 </code></pre>
@@ -121,10 +132,11 @@
 <li><code>container_of</code> 利用成员指针，获得结构体的指针。<strong>成员指针 - 成员的偏移量=结构体指针</strong></li>
 <li><code>list_entry</code> list_head 作为一个成员嵌入到结构体中，已知 list_head 指针，调用 <code>container_of</code> 获得结构体指针。</li>
 </ol>
-<h2 id="二hash-链表-hlist_">二、hash 链表 hlist_</h2>
-<p>linux 中定义 <code>hlist_head</code> 用作 hash 表中的链表头，<code>hlist_node</code> 用作链表中的某一项。</p>
-<p><em>include/linux/types.h</em></p>
-<pre><code>struct hlist_head {
+<h2 id="二hash-链表">二、hash 链表</h2>
+<p>linux kernel 中定义 <code>hlist_head</code> 用作 hash 表中的链表头，<code>hlist_node</code> 用作链表中的某一项。</p>
+<pre><code>// include/linux/types.h
+
+struct hlist_head {
 	struct hlist_node *first;
 };
 
@@ -132,11 +144,12 @@ struct hlist_node {
 	struct hlist_node *next, **pprev;
 };
 </code></pre>
-<p><img src="https://img.jaxwang.top/2025/04/743a01bbad60899615e2f1507da5f383.png" alt=""></p>
-<p>Linux 设计 <code>hlist_head</code> 仅包含一个指针用作 hash_table 中的列表头，这样可以节省很大空间，特别是当 hash bucket 很大的时候，可以节省一半空间。</p>
+<img src="https://img.jaxwang.top/2025/04/743a01bbad60899615e2f1507da5f383.png" width="50%" height="50%">
+<p>Linux kernel 设计 <code>hlist_head</code> 仅包含一个指针用作 hash_table 中的列表头，这样可以节省很大空间，特别是当 hash bucket 很大的时候，可以节省一半空间。</p>
 <p>散列表的冲突情况很少，链表不会很长，遍历很快。将 <code>pprev</code> 设计为指向前一个节点的 <code>next</code> 很容易实现删除操作。</p>
-<p><em>include/linux/list.h</em></p>
-<pre><code>static inline void __hlist_del(struct hlist_node *n)
+<pre><code>// include/linux/list.h
+
+static inline void __hlist_del(struct hlist_node *n)
 {
 	struct hlist_node *next = n-&gt;next;
 	struct hlist_node **pprev = n-&gt;pprev;
@@ -146,7 +159,7 @@ struct hlist_node {
 		WRITE_ONCE(next-&gt;pprev, pprev);
 }
 </code></pre>
-<h1 id="三ref">三、Ref</h1>
+<h1 id="ref">Ref</h1>
 <p><a href="https://blog.csdn.net/weixin_39094034/article/details/104803967">https://blog.csdn.net/weixin_39094034/article/details/104803967</a></p>
 <p><a href="https://linux.laoqinren.net/kernel/hlist/">https://linux.laoqinren.net/kernel/hlist/</a></p>
 
