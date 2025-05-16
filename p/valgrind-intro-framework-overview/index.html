@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Valgrind 基础介绍与框架概览 | Jackson Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link rel="stylesheet" href="/css/github-markdown-light.css" />
+    
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '7S26TLKGMX');
+        }
+      </script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/post/">Posts</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/about/">About</a></li>
+      
+      <li><a href="/bookshelf">Bookshelf</a></li>
+      
+      <li><a href="/index.xml">RSS</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div style="margin-left: auto; margin-right: 0; text-align: right;" >
+  📅
+   2025/04/19 
+  &nbsp
+
+  <span id="busuanzi_container_page_pv">
+  👀<span id="busuanzi_value_page_pv"></span>
+  </span> 
+</div>
+<div class="markdown-box">
+<main class="markdown-body">
+<h1 id="valgrind-基础介绍与框架概览">Valgrind 基础介绍与框架概览</h1>
+<p>Valgrind是一款用于内存调试、内存泄漏检测以及性能分析的软件开发工具，本文简单分析 Valgrind 基本原理及其框架组成，并记录其在嵌入式设备上的移植与调试过程。</p>
+<center>
+<img src="https://img.jaxwang.top/2025/05/58dd96be77f8cf9442f0177a402fc258.png" width="50%" height="50%">
+</center>
+<h2 id="一插桩技术概述">一、插桩技术概述</h2>
+<p><a href="https://en.wikipedia.org/wiki/Instrumentation_(computer_programming)">插桩</a>（instrumentation）技术是指<strong>在程序源码或二进制代码中插入监测代码</strong>实现对程序的监视。达到记录函数进入和退出、监控内存读写、统计执行时间、跟踪异常等。</p>
+<p>插桩在实现上可分为两类：</p>
+<ol>
+<li>静态插桩 Static Instrumentation：在程序编译之前或编译期间插入代码，即在<strong>源代码或中间代码</strong>中插入检测代码，最终编译成带有插桩的可执行文件。</li>
+<li>动态插桩 Dynamic Binary Instrumentation DBI：在程序运行中进行插桩，其操作对象为<strong>机器码</strong>。动态二进制插桩工具主要包含 Pin，Valgrind，DynamoRIO 等。</li>
+</ol>
+<h2 id="二valgrind-framework">二、Valgrind Framework</h2>
+<p>Valgrind 本质上是一套核心框架 framework，其提供了核心 Core 及 APIs ，在此框架基础上开发出 7 个工具：</p>
+<center>
+<img src="https://img.jaxwang.top/2025/05/50281872ddcb9927d56a85162f9c62f2.png" width="50%" height="50%">
+</center>
+<table>
+  <thead>
+      <tr>
+          <th>工具</th>
+          <th>描述</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>Memcheck</td>
+          <td>内存错误检测，用于检测内存泄漏、越界访问、使用未初始化内存等内存相关错误</td>
+      </tr>
+      <tr>
+          <td>Helgrind</td>
+          <td>线程错误检测，检测数据竞争（race conditions）和死锁</td>
+      </tr>
+      <tr>
+          <td>DRD</td>
+          <td>线程错误检测，使用与 Helgrind 不同技术</td>
+      </tr>
+      <tr>
+          <td>Cachegrind</td>
+          <td>缓存和分支预测分析</td>
+      </tr>
+      <tr>
+          <td>Callgrind</td>
+          <td>基于 Cachegrind，但额外生成调用图，分析函数调用及其性能影响</td>
+      </tr>
+      <tr>
+          <td>Massif</td>
+          <td>堆内存使用分析工具，帮助找出内存使用高峰及其来源</td>
+      </tr>
+      <tr>
+          <td>DHAT</td>
+          <td>分析堆内存分配和释放的详细情况</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="三嵌入式平台调试-memory-leak">三、嵌入式平台调试 memory leak</h2>
+<ol>
+<li>指定 <code>toolchains</code></li>
+</ol>
+<pre><code>export GCC_PATH=/your_path_for_linaro/bin
+export CC=${GCC_PATH}/aarch64-linux-gnu-gcc
+export LD=${GCC_PATH}/aarch64-linux-gnu-ld
+export AR=${GCC_PATH}/aarch64-linux-gnu-ar
+</code></pre>
+<ol start="2">
+<li>编译配置</li>
+</ol>
+<pre><code>cd valgrind
+./autogen.sh
+./configure --prefix=`pwd`/Inst --host=aarch64-unknown-linux --enable-only64bit
+</code></pre>
+<ol start="3">
+<li>编译安装</li>
+</ol>
+<pre><code>make -j4 install
+</code></pre>
+<ol start="4">
+<li>准备带有debug info 的 libc</li>
+</ol>
+<p>valgrind 需要使用带调试信息的 <code>libc</code>，否则会报 <code>cannot be set up</code> 错误，在 <code>libc</code> 可以在交叉编译工具链中找到。</p>
+<pre><code>$ find . -name &quot;*ld*.so&quot;
+./aarch64-linux-gnu/libc/lib/ld-2.25.so
+$ file ./aarch64-linux-gnu/libc/lib/ld-
+ld-2.25.so             ld-linux-aarch64.so.1
+$ file ./aarch64-linux-gnu/libc/lib/ld-2.25.so
+./aarch64-linux-gnu/libc/lib/ld-2.25.so: ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, BuildID[sha1]=73b23c16ff9fe3eab046636cd9dd6db9d3309f27, with debug_info, not stripped
+</code></pre>
+<ol start="5">
+<li>开始检测</li>
+</ol>
+<p>将编译产生的工具目录和 <code>libc</code> 放入板子，启动 valgrind.</p>
+<pre><code>export VALGRIND_LIB=/libexec/valgrind &amp;&amp; valgrind --tool=memcheck --leak-check=full /tmp/ld-2.28.so program
+</code></pre>
+<p>如果调试的 daemon 程序，可以在运行一段时间后通过 <code>SIGTERM</code> 信号终止 <code>valgrind</code> 获取结果。</p>
+<h2 id="references">References</h2>
+<p>valgrind.org <a href="https://valgrind.org/">https://valgrind.org/</a></p>
+<p><a href="https://www.cnblogs.com/yucloud/p/armbuild_valgrind3.html">https://www.cnblogs.com/yucloud/p/armbuild_valgrind3.html</a></p>
+<p><a href="https://valgrind.org/downloads/repository.html">https://valgrind.org/downloads/repository.html</a></p>
+<p>论文 模糊测试中的静态插桩技术 <a href="https://crad.ict.ac.cn/cn/article/pdf/preview/10.7544/issn1000-1239.202220883.pdf">https://crad.ict.ac.cn/cn/article/pdf/preview/10.7544/issn1000-1239.202220883.pdf</a></p>
+<p>论文 Valgrind: A Framework for Heavyweight Dynamic Binary Instrumentation <a href="https://valgrind.org/docs/valgrind2007.pdf">https://valgrind.org/docs/valgrind2007.pdf</a></p>
+<p><a href="https://zhuanlan.zhihu.com/p/382100526">https://zhuanlan.zhihu.com/p/382100526</a></p>
+<p><a href="https://robotchaox.github.io/linux-tool/valgrind%E5%86%85%E5%AD%98%E6%A3%80%E6%B5%8B.html">https://robotchaox.github.io/linux-tool/valgrind%E5%86%85%E5%AD%98%E6%A3%80%E6%B5%8B.html</a></p>
+<p><a href="https://www.semanticscholar.org/paper/Runtime-Overhead-Reduction-in-Automated-Parallel-Hoshi-Ootsu/3035e38a830e14daf02d55c13037f101e55b0246">https://www.semanticscholar.org/paper/Runtime-Overhead-Reduction-in-Automated-Parallel-Hoshi-Ootsu/3035e38a830e14daf02d55c13037f101e55b0246</a></p>
+
+</main>
+</div>
+
+<br>
+
+<script src="https://giscus.app/client.js"
+        data-repo="JaxWang28/Blog"
+        data-repo-id="R_kgDOIbrexg"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOIbrexs4CSjN8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+
+  <footer>
+  <hr/>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+
+<div class="busuanzi-footer">
+  <span id="busuanzi_container_site_pv">
+    总访问量 <span id="busuanzi_value_site_pv"></span> 次
+  </span>
+  <span id="busuanzi_container_site_uv">
+    访客数 <span id="busuanzi_value_site_uv"></span> 人次
+  </span>
+</div>
+  
+  <hr/>
+  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2017 &ndash; 2025 | <a href="https://github.com/jaxwang28">Github</a>
+  
+  </footer>
+  </body>
+</html>
+

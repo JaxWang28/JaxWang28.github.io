@@ -36,5 +36,26 @@
       <guid>https://blog.jaxwang.top/tags/memorymamagemtn/</guid>
       <description></description>
     </item>
+    <item>
+      <title>Debug</title>
+      <link>https://blog.jaxwang.top/tags/debug/</link>
+      <pubDate>Sat, 19 Apr 2025 21:45:06 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/tags/debug/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Embeded</title>
+      <link>https://blog.jaxwang.top/tags/embeded/</link>
+      <pubDate>Sat, 19 Apr 2025 21:45:06 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/tags/embeded/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>Valgrind</title>
+      <link>https://blog.jaxwang.top/tags/valgrind/</link>
+      <pubDate>Sat, 19 Apr 2025 21:45:06 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/tags/valgrind/</guid>
+      <description></description>
+    </item>
   </channel>
 </rss>
