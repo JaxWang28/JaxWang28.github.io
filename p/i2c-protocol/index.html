@@ -64,7 +64,7 @@
 <div class="markdown-box">
 <main class="markdown-body">
 <h1 id="i2c-通信协议">I2C 通信协议</h1>
-<p>I2C 是一种<strong>系统内部协议</strong>，即在系统内多个集成电路(IC)间的通讯。其支持 3 种传输模式，本文不对 3 种传输模式展开，仅分析基本原理。</p>
+<p>I2C 是一种半双工<strong>系统内部协议</strong>，即在系统内多个集成电路(IC)间的通讯。其支持 3 种传输模式，本文不对 3 种传输模式展开，仅分析基本原理。</p>
 <h2 id="一物理层">一、物理层</h2>
 <p>I2C 通信设备之间的常用连接方式如下：</p>
 <p><img src="https://img.jaxwang.top/2025/05/1746f76b8a598ac9083caf25e73ea9cc.png" alt=""></p>
@@ -94,7 +94,7 @@
 <li>它可以将输出驱动为低电平，将其驱动为高电平</li>
 <li>为了使线路能够变高，您必须提供上拉电阻</li>
 </ol>
-<p>不同于 RS-232 串口通信，I2C 拥有一条时钟线，为同步传输，其数据有效性如下：</p>
+<p>不同于 RS-232 为异步通信需要设置波特率，I2C 拥有一条时钟线，为同步传输，其数据有效性如下：</p>
 <ul>
 <li>SCL为高电平的时候SDA表示的数据有效：SDA 为高电平时表示逻辑1， 为低电平时表示逻辑0</li>
 <li>SCL为低电平的时候SDA表示的数据无效：SDA 一般在这个时候进行电平切换</li>
@@ -105,10 +105,10 @@
 <p><img src="https://img.jaxwang.top/2025/05/2b0cafa288aa0740a608ca59a5ae7cb3.jpeg" alt=""></p>
 <p><img src="https://img.jaxwang.top/2025/05/00b6f43c6d80736921627bb7b5741d56.jpeg" alt=""></p>
 <ol>
-<li>
-<p>起始信号 S 当 SCL 线是高电平时 SDA 线从高电平向低电平切换，这个情况表示通讯的起始。起始和停止信号一般由主机产生。
-<img src="https://img.jaxwang.top/2025/05/35e8b3ffbcc8f9e9f2f561d07c69755d.png" alt=""></p>
-</li>
+<li>起始信号 S 当 SCL 线是高电平时 SDA 线从高电平向低电平切换，这个情况表示通讯的起始。起始和停止信号一般由主机产生。</li>
+</ol>
+<p><img src="https://img.jaxwang.top/2025/05/35e8b3ffbcc8f9e9f2f561d07c69755d.png" alt=""></p>
+<ol start="2">
 <li>
 <p>从机地址信号 (SLAVE_ADDRESS)：其实信号产生后所有从机开始等待主机接下来的广播。与主机广播地址相同的设备被选中等待接下来的信号，其余设备会忽略接下来的信号。这个从机地址可以是7位或10位</p>
 </li>
