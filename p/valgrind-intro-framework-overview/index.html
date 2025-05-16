@@ -142,9 +142,9 @@ export AR=${GCC_PATH}/aarch64-linux-gnu-ar
 <pre><code>make -j4 install
 </code></pre>
 <ol start="4">
-<li>准备带有 debug info 的 libc</li>
+<li>准备带有 debug info 的 <code>ld.so</code></li>
 </ol>
-<p>valgrind 需要使用带调试信息的 <code>libc</code>，否则会报 <code>cannot be set up</code> 错误，<code>libc</code> 可以在交叉编译工具链中找到。</p>
+<p><code>valgrind memcheck</code> 需要使用带调试信息的 <code>ld.so</code>， 其会拦截并替换 ld.so 中的某些符号（比如 strlen）以实现正确的检测[1]。 否则会报 <code>cannot be set up</code> 错误，<code>ld.so</code> 可以在交叉编译工具链中找到。</p>
 <pre><code>$ find . -name &quot;*ld*.so&quot;
 ./aarch64-linux-gnu/libc/lib/ld-2.25.so
 $ file ./aarch64-linux-gnu/libc/lib/ld-
@@ -155,19 +155,20 @@ $ file ./aarch64-linux-gnu/libc/lib/ld-2.25.so
 <ol start="5">
 <li>开始检测</li>
 </ol>
-<p>将编译产生的工具目录和 <code>libc</code> 放入板子，启动 valgrind.</p>
+<p>将编译产生的工具目录和 <code>ld.so</code> 放入板子，启动 valgrind.</p>
 <pre><code>export VALGRIND_LIB=/libexec/valgrind &amp;&amp; valgrind --tool=memcheck --leak-check=full /tmp/ld-2.28.so program
 </code></pre>
 <p>如果调试的 daemon 程序，可以在运行一段时间后通过 <code>SIGTERM</code> 信号终止 <code>valgrind</code> 获取结果。</p>
 <h2 id="references">References</h2>
-<p>valgrind.org <a href="https://valgrind.org/">https://valgrind.org/</a></p>
-<p><a href="https://www.cnblogs.com/yucloud/p/armbuild_valgrind3.html">https://www.cnblogs.com/yucloud/p/armbuild_valgrind3.html</a></p>
-<p><a href="https://valgrind.org/downloads/repository.html">https://valgrind.org/downloads/repository.html</a></p>
-<p>论文 模糊测试中的静态插桩技术 <a href="https://crad.ict.ac.cn/cn/article/pdf/preview/10.7544/issn1000-1239.202220883.pdf">https://crad.ict.ac.cn/cn/article/pdf/preview/10.7544/issn1000-1239.202220883.pdf</a></p>
-<p>论文 Valgrind: A Framework for Heavyweight Dynamic Binary Instrumentation <a href="https://valgrind.org/docs/valgrind2007.pdf">https://valgrind.org/docs/valgrind2007.pdf</a></p>
-<p><a href="https://zhuanlan.zhihu.com/p/382100526">https://zhuanlan.zhihu.com/p/382100526</a></p>
-<p><a href="https://robotchaox.github.io/linux-tool/valgrind%E5%86%85%E5%AD%98%E6%A3%80%E6%B5%8B.html">https://robotchaox.github.io/linux-tool/valgrind%E5%86%85%E5%AD%98%E6%A3%80%E6%B5%8B.html</a></p>
-<p><a href="https://www.semanticscholar.org/paper/Runtime-Overhead-Reduction-in-Automated-Parallel-Hoshi-Ootsu/3035e38a830e14daf02d55c13037f101e55b0246">https://www.semanticscholar.org/paper/Runtime-Overhead-Reduction-in-Automated-Parallel-Hoshi-Ootsu/3035e38a830e14daf02d55c13037f101e55b0246</a></p>
+<p>[1] <a href="https://valgrind.org/docs/manual/dist.readme-packagers.html">https://valgrind.org/docs/manual/dist.readme-packagers.html</a></p>
+<p>[2] valgrind.org <a href="https://valgrind.org/">https://valgrind.org/</a></p>
+<p>[3] <a href="https://www.cnblogs.com/yucloud/p/armbuild_valgrind3.html">https://www.cnblogs.com/yucloud/p/armbuild_valgrind3.html</a></p>
+<p>[4] <a href="https://valgrind.org/downloads/repository.html">https://valgrind.org/downloads/repository.html</a></p>
+<p>[5] 论文 模糊测试中的静态插桩技术 <a href="https://crad.ict.ac.cn/cn/article/pdf/preview/10.7544/issn1000-1239.202220883.pdf">https://crad.ict.ac.cn/cn/article/pdf/preview/10.7544/issn1000-1239.202220883.pdf</a></p>
+<p>[6] 论文 Valgrind: A Framework for Heavyweight Dynamic Binary Instrumentation <a href="https://valgrind.org/docs/valgrind2007.pdf">https://valgrind.org/docs/valgrind2007.pdf</a></p>
+<p>[7] <a href="https://zhuanlan.zhihu.com/p/382100526">https://zhuanlan.zhihu.com/p/382100526</a></p>
+<p>[8] <a href="https://robotchaox.github.io/linux-tool/valgrind%E5%86%85%E5%AD%98%E6%A3%80%E6%B5%8B.html">https://robotchaox.github.io/linux-tool/valgrind%E5%86%85%E5%AD%98%E6%A3%80%E6%B5%8B.html</a></p>
+<p>[9] <a href="https://www.semanticscholar.org/paper/Runtime-Overhead-Reduction-in-Automated-Parallel-Hoshi-Ootsu/3035e38a830e14daf02d55c13037f101e55b0246">https://www.semanticscholar.org/paper/Runtime-Overhead-Reduction-in-Automated-Parallel-Hoshi-Ootsu/3035e38a830e14daf02d55c13037f101e55b0246</a></p>
 
 </main>
 </div>
