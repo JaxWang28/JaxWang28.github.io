@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RS-232 串口通信协议 | Jackson Blog</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    <link rel="stylesheet" href="/css/github-markdown-light.css" />
+    
+<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+<link rel="manifest" href="/favicon/site.webmanifest">
+
+
+      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
+      <script>
+        var doNotTrack = false;
+        if ( false ) {
+          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
+          var doNotTrack = (dnt == "1" || dnt == "yes");
+        }
+        if (!doNotTrack) {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '7S26TLKGMX');
+        }
+      </script>
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/post/">Posts</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/about/">About</a></li>
+      
+      <li><a href="/index.xml">RSS</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div style="margin-left: auto; margin-right: 0; text-align: right;" >
+  📅
+   2025/05/16 
+  &nbsp
+
+  <span id="busuanzi_container_page_pv">
+  👀<span id="busuanzi_value_page_pv"></span>
+  </span> 
+</div>
+<div class="markdown-box">
+<main class="markdown-body">
+<p>串口通信（Serial Communication）是一种常用的<strong>系统间通信方式</strong>。其使用 RS-232 标准。本文将从物理层和协议层讲解 RS-232 标准。</p>
+<p><img src="https://img.jaxwang.top/2025/05/8f404cbc844bb57a6d272703ad138a10.png" alt=""></p>
+<h2 id="一物理层">一、物理层</h2>
+<p>RS-232 标准使用 9 根信号线，其接口被称为 COM 口（DB9 口）。</p>
+<p><img src="https://img.jaxwang.top/2025/05/a8aa058ba5200ee1e3184705e041e59a.png" alt=""></p>
+<p><img src="https://img.jaxwang.top/2025/05/010bcb3789abb61752b58e1c34a42168.png" alt=""></p>
+<p>在目前的其它工业控制使用的串口通讯中，<strong>一般只使用RXD、TXD以及GND三条信号线</strong>， 直接传输数据信号，而RTS、CTS、DSR、DTR及DCD信号都被裁剪掉了。</p>
+<p>常见的电子电路中常使用 TTL 的电平标准，使用 5V 表示逻辑1，使用 0V 表示逻辑0。但是为了提升远距离传输和抗干扰能力，RS-232 标准使用 -15V 表示逻辑1，+15V 表示逻辑0。因为控制器一般使用TTL电平标准，所以常常会使用MAX3232芯片对TTL及RS-232电平的信号进行互相转换。</p>
+<table>
+  <thead>
+      <tr>
+          <th>电平标准</th>
+          <th>描述</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>5V TTL</td>
+          <td>逻辑1: 2.4<del>5V<br>逻辑0: 0</del>0.5V</td>
+      </tr>
+      <tr>
+          <td>RS-232</td>
+          <td>逻辑1: -15~-3V<br>逻辑0: +3~+15V</td>
+      </tr>
+  </tbody>
+</table>
+<center><img src="https://img.jaxwang.top/2025/05/5b401a051ccc7b9af23048dc20e26626.png" width="50%" height="50%"> </center>
+<h2 id="二协议层">二、协议层</h2>
+<p>RS-232 标准的数据包由发送端的 TXD 接口发送到接收端的 RXD 接口。其数据包由<strong>起始位、数据位、校验位和停止位</strong>组成。通信双方必须对数据包的格式约定一致才可正确通信。</p>
+<p><img src="https://img.jaxwang.top/2025/05/865e7a5f6476c480303a824543d8ad10.png" alt=""></p>
+<ul>
+<li>空闲：空闲时一直处于高电位即逻辑1</li>
+<li>起始位：数据包的起始信号由一个逻辑0的数据位表示</li>
+<li>有效数据：有效数据的长度常被约定为5、6、7或8位长</li>
+<li>数据检验：检验方法有奇校验(odd)、偶校验(even)、0校验(space)、1校验(mark)以及无校验(noparity)</li>
+<li>停止位：数据包的停止信号可由0.5、1、1.5或2个逻辑1的数据位表示，只要双方约定一致即可</li>
+</ul>
+<center><img src="https://img.jaxwang.top/2025/05/3f09d2ad784bdaa1d3ad0034f6636a0d.png" width="50%" height="50%"> </center>
+<p>由于 RS-232 是串口异步通讯，即通信过程中没有时钟信号（DB9接口中是没有时钟信号的），所以两个通讯设备之间需要约定好波特率，即每个码元的长度，以便对信号进行解码。常见的波特率为4800、9600、115200等。</p>
+<h2 id="ref">Ref</h2>
+<p><a href="https://doc.embedfire.com/mcu/stm32/f103badao/std/zh/latest/book/USART.html">https://doc.embedfire.com/mcu/stm32/f103badao/std/zh/latest/book/USART.html</a> 野火STM32</p>
+
+</main>
+</div>
+
+<br>
+
+<script src="https://giscus.app/client.js"
+        data-repo="JaxWang28/Blog"
+        data-repo-id="R_kgDOIbrexg"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOIbrexs4CSjN8"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="light"
+        data-lang="zh-CN"
+        crossorigin="anonymous"
+        async>
+</script>
+
+  <footer>
+  <hr/>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
+
+<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
+
+
+<div class="busuanzi-footer">
+  <span id="busuanzi_container_site_pv">
+    总访问量 <span id="busuanzi_value_site_pv"></span> 次
+  </span>
+  <span id="busuanzi_container_site_uv">
+    访客数 <span id="busuanzi_value_site_uv"></span> 人次
+  </span>
+</div>
+  
+  <hr/>
+  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2017 &ndash; 2025 | <a href="https://github.com/jaxwang28">Github</a>
+  
+  </footer>
+  </body>
+</html>
+

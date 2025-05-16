@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Protocol on Jackson Blog</title>
+    <link>https://blog.jaxwang.top/tags/protocol/</link>
+    <description>Recent content in Protocol on Jackson Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 16 May 2025 12:12:00 +0800</lastBuildDate>
+    <atom:link href="https://blog.jaxwang.top/tags/protocol/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>RS-232 串口通信协议</title>
+      <link>https://blog.jaxwang.top/p/rs232-protocol/</link>
+      <pubDate>Fri, 16 May 2025 12:12:00 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/p/rs232-protocol/</guid>
+      <description>&lt;p&gt;串口通信（Serial Communication）是一种常用的&lt;strong&gt;系统间通信方式&lt;/strong&gt;。其使用 RS-232 标准。本文将从物理层和协议层讲解 RS-232 标准。&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2025/05/8f404cbc844bb57a6d272703ad138a10.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;h2 id=&#34;一物理层&#34;&gt;一、物理层&lt;/h2&gt;&#xA;&lt;p&gt;RS-232 标准使用 9 根信号线，其接口被称为 COM 口（DB9 口）。&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2025/05/a8aa058ba5200ee1e3184705e041e59a.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2025/05/010bcb3789abb61752b58e1c34a42168.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;p&gt;在目前的其它工业控制使用的串口通讯中，&lt;strong&gt;一般只使用RXD、TXD以及GND三条信号线&lt;/strong&gt;， 直接传输数据信号，而RTS、CTS、DSR、DTR及DCD信号都被裁剪掉了。&lt;/p&gt;&#xA;&lt;p&gt;常见的电子电路中常使用 TTL 的电平标准，使用 5V 表示逻辑1，使用 0V 表示逻辑0。但是为了提升远距离传输和抗干扰能力，RS-232 标准使用 -15V 表示逻辑1，+15V 表示逻辑0。因为控制器一般使用TTL电平标准，所以常常会使用MAX3232芯片对TTL及RS-232电平的信号进行互相转换。&lt;/p&gt;&#xA;&lt;table&gt;&#xA;  &lt;thead&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;th&gt;电平标准&lt;/th&gt;&#xA;          &lt;th&gt;描述&lt;/th&gt;&#xA;      &lt;/tr&gt;&#xA;  &lt;/thead&gt;&#xA;  &lt;tbody&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td&gt;5V TTL&lt;/td&gt;&#xA;          &lt;td&gt;逻辑1: 2.4&lt;del&gt;5V&lt;br&gt;逻辑0: 0&lt;/del&gt;0.5V&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;      &lt;tr&gt;&#xA;          &lt;td&gt;RS-232&lt;/td&gt;&#xA;          &lt;td&gt;逻辑1: -15~-3V&lt;br&gt;逻辑0: +3~+15V&lt;/td&gt;&#xA;      &lt;/tr&gt;&#xA;  &lt;/tbody&gt;&#xA;&lt;/table&gt;&#xA;&lt;center&gt;&lt;img src=&#34;https://img.jaxwang.top/2025/05/5b401a051ccc7b9af23048dc20e26626.png&#34; width=&#34;50%&#34; height=&#34;50%&#34;&gt; &lt;/center&gt;&#xA;&lt;h2 id=&#34;二协议层&#34;&gt;二、协议层&lt;/h2&gt;&#xA;&lt;p&gt;RS-232 标准的数据包由发送端的 TXD 接口发送到接收端的 RXD 接口。其数据包由&lt;strong&gt;起始位、数据位、校验位和停止位&lt;/strong&gt;组成。通信双方必须对数据包的格式约定一致才可正确通信。&lt;/p&gt;&#xA;&lt;p&gt;&lt;img src=&#34;https://img.jaxwang.top/2025/05/865e7a5f6476c480303a824543d8ad10.png&#34; alt=&#34;&#34;&gt;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;空闲：空闲时一直处于高电位即逻辑1&lt;/li&gt;&#xA;&lt;li&gt;起始位：数据包的起始信号由一个逻辑0的数据位表示&lt;/li&gt;&#xA;&lt;li&gt;有效数据：有效数据的长度常被约定为5、6、7或8位长&lt;/li&gt;&#xA;&lt;li&gt;数据检验：检验方法有奇校验(odd)、偶校验(even)、0校验(space)、1校验(mark)以及无校验(noparity)&lt;/li&gt;&#xA;&lt;li&gt;停止位：数据包的停止信号可由0.5、1、1.5或2个逻辑1的数据位表示，只要双方约定一致即可&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;center&gt;&lt;img src=&#34;https://img.jaxwang.top/2025/05/3f09d2ad784bdaa1d3ad0034f6636a0d.png&#34; width=&#34;50%&#34; height=&#34;50%&#34;&gt; &lt;/center&gt;&#xA;&lt;p&gt;由于 RS-232 是串口异步通讯，即通信过程中没有时钟信号（DB9接口中是没有时钟信号的），所以两个通讯设备之间需要约定好波特率，即每个码元的长度，以便对信号进行解码。常见的波特率为4800、9600、115200等。&lt;/p&gt;&#xA;&lt;h2 id=&#34;ref&#34;&gt;Ref&lt;/h2&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://doc.embedfire.com/mcu/stm32/f103badao/std/zh/latest/book/USART.html&#34;&gt;https://doc.embedfire.com/mcu/stm32/f103badao/std/zh/latest/book/USART.html&lt;/a&gt; 野火STM32&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
