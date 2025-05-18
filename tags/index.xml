@@ -6,8 +6,22 @@
     <description>Recent content in Tags on Jackson Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 16 May 2025 14:12:00 +0800</lastBuildDate>
+    <lastBuildDate>Sun, 18 May 2025 21:37:06 +0800</lastBuildDate>
     <atom:link href="https://blog.jaxwang.top/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Kernel</title>
+      <link>https://blog.jaxwang.top/tags/kernel/</link>
+      <pubDate>Sun, 18 May 2025 21:37:06 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/tags/kernel/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>KernelSynchronization</title>
+      <link>https://blog.jaxwang.top/tags/kernelsynchronization/</link>
+      <pubDate>Sun, 18 May 2025 21:37:06 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/tags/kernelsynchronization/</guid>
+      <description></description>
+    </item>
     <item>
       <title>Protocol</title>
       <link>https://blog.jaxwang.top/tags/protocol/</link>
@@ -20,13 +34,6 @@
       <link>https://blog.jaxwang.top/tags/datastructure/</link>
       <pubDate>Wed, 30 Apr 2025 15:07:00 +0800</pubDate>
       <guid>https://blog.jaxwang.top/tags/datastructure/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>Kernel</title>
-      <link>https://blog.jaxwang.top/tags/kernel/</link>
-      <pubDate>Wed, 30 Apr 2025 15:07:00 +0800</pubDate>
-      <guid>https://blog.jaxwang.top/tags/kernel/</guid>
       <description></description>
     </item>
     <item>

@@ -5,7 +5,19 @@
     <loc>https://blog.jaxwang.top/</loc>
     <lastmod>2025-05-18T21:37:06+08:00</lastmod>
   </url><url>
+    <loc>https://blog.jaxwang.top/tags/kernel/</loc>
+    <lastmod>2025-05-18T21:37:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/tags/kernelsynchronization/</loc>
+    <lastmod>2025-05-18T21:37:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/p/linux-kernel-synchronization-atomic-operations/</loc>
+    <lastmod>2025-05-18T21:37:06+08:00</lastmod>
+  </url><url>
     <loc>https://blog.jaxwang.top/post/</loc>
+    <lastmod>2025-05-18T21:37:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/tags/</loc>
     <lastmod>2025-05-18T21:37:06+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/p/i2c-protocol/</loc>
@@ -14,16 +26,10 @@
     <loc>https://blog.jaxwang.top/tags/protocol/</loc>
     <lastmod>2025-05-16T14:12:00+08:00</lastmod>
   </url><url>
-    <loc>https://blog.jaxwang.top/tags/</loc>
-    <lastmod>2025-05-16T14:12:00+08:00</lastmod>
-  </url><url>
     <loc>https://blog.jaxwang.top/p/rs232-protocol/</loc>
     <lastmod>2025-05-16T12:12:00+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/datastructure/</loc>
-    <lastmod>2025-04-30T15:07:00+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.jaxwang.top/tags/kernel/</loc>
     <lastmod>2025-04-30T15:07:00+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/p/linux-data-structure-list/</loc>
