@@ -80,9 +80,9 @@ void thread_B _func()
 <p>上面代码的理想执行结果是<code>i</code> 为 2，但事实并非如此， i 在有一定的概率为 1。对于 <code>thread_A</code> 和 <code>thread_B</code> 进行的操作可以简单理解为：<strong>读 - 修改 - 回写</strong>。从单处理器和多处理器角度分析：</p>
 <ul>
 <li>单处理器：<code>thread_A</code> 与 <code>thread_B</code> 存在并发，当 <code>thread_A</code> 执行完 <code>读</code> 操作，CPU 有可能切换为 <code>thread_B</code> 执行 <code>读</code> 操作，这样最终的结果为 1.</li>
-<li>多处理器：<code>thread_A</code> 与 <code>thread_B</code> 存在并发，<code>thread_A</code> 与 <code>thread_B</code> 可能同时执行 <code>读</code> 操作，这样最终结果也为 1.
-因此，要想保证结果的正确性，我们必须保证上面的操作完整地原子地（不间断地）完成<strong>读-修改-回写</strong>。</li>
+<li>多处理器：<code>thread_A</code> 与 <code>thread_B</code> 存在并发，<code>thread_A</code> 与 <code>thread_B</code> 可能同时执行 <code>读</code> 操作，这样最终结果也为 1.</li>
 </ul>
+<p>因此，要想保证结果的正确性，我们必须保证上面的操作完整地原子地（不间断地）完成<strong>读-修改-回写</strong>。</p>
 <p>原子操作是以硬件为基础，即 <strong>CPU 必须提供原子操作的汇编指令</strong>。本文以 ARMv8 架构为例从下至上分析原子操作。</p>
 <h2 id="arm64-原子操作">ARM64 原子操作</h2>
 <p>原子操作需要处理器提供硬件支持，ARMv8 提供两种方式实现了原子操作：</p>
