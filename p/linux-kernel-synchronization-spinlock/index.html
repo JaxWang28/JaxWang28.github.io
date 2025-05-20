@@ -217,11 +217,11 @@ Date:   Tue Mar 13 20:45:45 2018 +0000
 <li>当线程释放锁时：
 <ol>
 <li>若 <code>next</code> 不为 <code>NULL</code>，则将 <code>next-&gt;locket</code> 置为 <code>1</code>。如图中时刻 4。</li>
-<li>若 <code>next</code> 为 <code>NULL</code>，则将自旋锁变量置为 <code>NULL</code>
-<img src="https://img.jaxwang.top/2025/05/2633c01cacf10dc09abfdfb4706f9b18.png" alt=""></li>
+<li>若 <code>next</code> 为 <code>NULL</code>，则将自旋锁变量置为 <code>NULL</code></li>
 </ol>
 </li>
 </ol>
+<p><img src="https://img.jaxwang.top/2025/05/2633c01cacf10dc09abfdfb4706f9b18.png" alt=""></p>
 <pre><code>static inline
 void mcs_spin_lock(struct mcs_spinlock **lock, struct mcs_spinlock *node)
 {

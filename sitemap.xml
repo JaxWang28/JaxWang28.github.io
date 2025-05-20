@@ -3,7 +3,10 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://blog.jaxwang.top/</loc>
-    <lastmod>2025-05-19T22:37:06+08:00</lastmod>
+    <lastmod>2025-05-20T20:37:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/post/</loc>
+    <lastmod>2025-05-20T20:37:06+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/kernel/</loc>
     <lastmod>2025-05-19T22:37:06+08:00</lastmod>
@@ -12,9 +15,6 @@
     <lastmod>2025-05-19T22:37:06+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/p/linux-kernel-synchronization-spinlock/</loc>
-    <lastmod>2025-05-19T22:37:06+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.jaxwang.top/post/</loc>
     <lastmod>2025-05-19T22:37:06+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/tags/</loc>
