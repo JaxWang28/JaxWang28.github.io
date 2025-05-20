@@ -5,19 +5,22 @@
     <loc>https://blog.jaxwang.top/</loc>
     <lastmod>2025-05-19T22:37:06+08:00</lastmod>
   </url><url>
+    <loc>https://blog.jaxwang.top/tags/kernel/</loc>
+    <lastmod>2025-05-19T22:37:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/tags/kernelsynchronization/</loc>
+    <lastmod>2025-05-19T22:37:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang.top/p/linux-kernel-synchronization-spinlock/</loc>
+    <lastmod>2025-05-19T22:37:06+08:00</lastmod>
+  </url><url>
     <loc>https://blog.jaxwang.top/post/</loc>
     <lastmod>2025-05-19T22:37:06+08:00</lastmod>
   </url><url>
-    <loc>https://blog.jaxwang.top/tags/kernel/</loc>
-    <lastmod>2025-05-19T20:37:06+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.jaxwang.top/tags/kernelsynchronization/</loc>
-    <lastmod>2025-05-19T20:37:06+08:00</lastmod>
+    <loc>https://blog.jaxwang.top/tags/</loc>
+    <lastmod>2025-05-19T22:37:06+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/p/linux-kernel-synchronization-optimization-memory-barriers/</loc>
-    <lastmod>2025-05-19T20:37:06+08:00</lastmod>
-  </url><url>
-    <loc>https://blog.jaxwang.top/tags/</loc>
     <lastmod>2025-05-19T20:37:06+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang.top/p/linux-kernel-synchronization-atomic-operations/</loc>
