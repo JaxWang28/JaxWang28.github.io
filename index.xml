@@ -6,8 +6,15 @@
     <description>Recent content in Home on Jackson Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 19 May 2025 22:37:06 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 20 May 2025 20:37:06 +0800</lastBuildDate>
     <atom:link href="https://blog.jaxwang.top/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Linux Kernel 内核同步之 RCU</title>
+      <link>https://blog.jaxwang.top/p/linux-kernel-synchronization-rcu/</link>
+      <pubDate>Tue, 20 May 2025 20:37:06 +0800</pubDate>
+      <guid>https://blog.jaxwang.top/p/linux-kernel-synchronization-rcu/</guid>
+      <description>&lt;h1 id=&#34;linux-kernel-内核同步之-rcu&#34;&gt;Linux Kernel 内核同步之 RCU&lt;/h1&gt;&#xA;&lt;p&gt;尽管 &lt;code&gt;rwlock&lt;/code&gt; 相对于 &lt;code&gt;spinlock&lt;/code&gt; 做了很大的改进，&lt;code&gt;rwlock&lt;/code&gt; 允许多个读者同时并发访问。但是进行写操作时，仅有一个写者具有访问权限，读者不可访问。&lt;code&gt;RCU&lt;/code&gt; 进一步改善了这个问题，其允许多个读者和写者并发执行。而且 &lt;code&gt;RCU&lt;/code&gt; 是不使用锁的，其对读者几乎没有限制，访问效率极高。本文简单概述这项技术。&lt;/p&gt;&#xA;&lt;h2 id=&#34;一rcu-概念理解&#34;&gt;一、RCU 概念理解&lt;/h2&gt;&#xA;&lt;p&gt;以下面的情景引出 RCU 。&lt;/p&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;假设你写好一份作业，某一时刻同学A 找到你想借鉴一下你的作业，你把作业放在桌子上让同学A 借鉴。&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;没过几分钟（同学A 还在借鉴 :) ），同学B 也来找到你，也想借鉴你一下你的作业，你指了指正在借鉴作业的同学A，说：“过去吧，你们两一起借鉴。”&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;突然，你发现你的作业错写了一步，同学A 和同学B 正在借鉴（读操作）你的作业，此时你又没法修改（不可打断同学A 和同学B，也不能他们读的同时你修改）。怎么办？&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;你以迅雷不及掩耳之势拿出一张A4纸（假设本次作业就是一张 A4纸），copy 原作页并开始改正。好巧不巧，此时同学C 又来借鉴你的作业了，而你此时还没改完，怎么办？那只好和同学A 同学B 一起去借鉴你的原作业。&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;终于，你改正完了，此时你拥有了一份新的作业，原来那份就报废了（当然现在还不行，因为同学ABC 还在借鉴）。这时，同学D 也来了，想借鉴你的作业，这时你不能再让他借鉴你的旧作业了。你大方的指了指你的新作业。&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;li&gt;&#xA;&lt;p&gt;过了一会，同学ABC 都已经借鉴完你的旧作业了（虽然旧作业是有误的，但是你没责任提醒他们）。你发现已经没有同学借鉴你的旧作业了，你就可以把就作业销毁了。&lt;/p&gt;&#xA;&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;p&gt;以上就是一个 RCU 的过程。从上面我们发现，都是以&lt;strong&gt;你&lt;/strong&gt;为中心，而不是你的作业。因此你可以拥有一份新的作业的同时暂时不销毁旧作业。你就像一个指针，指向一份作业。在拥有新作业的同时（malloc），而暂时不销毁旧作业（free）。这也就是为什么&lt;strong&gt;RCU 只保护被动态分配并且通过指针引用的数据结构&lt;/strong&gt;。&lt;/p&gt;&#xA;&lt;h2 id=&#34;二rcu-5-core-apis&#34;&gt;二、RCU 5 core APIs&lt;/h2&gt;&#xA;&lt;p&gt;The core RCU API is quite small:&lt;/p&gt;&#xA;&lt;ol&gt;&#xA;&lt;li&gt;Updateer &lt;code&gt;rcu_assign_pointer&lt;/code&gt;&lt;/li&gt;&#xA;&lt;/ol&gt;&#xA;&lt;pre&gt;&lt;code&gt;  1 struct foo {&#xA;  2   int a;&#xA;  3   int b;&#xA;  4   int c;&#xA;  5 };&#xA;  6 struct foo *gp = NULL;&#xA;  7 &#xA;  8 /* . . . */&#xA;  9 &#xA; 10 p = kmalloc(sizeof(*p), GFP_KERNEL);&#xA; 11 p-&amp;gt;a = 1;&#xA; 12 p-&amp;gt;b = 2;&#xA; 13 p-&amp;gt;c = 3;&#xA; 14 gp = p;&#xA;&lt;/code&gt;&lt;/pre&gt;&#xA;&lt;p&gt;根据优化和内存屏障部分我们知道 11 12 13 14 行代码不一定按照我们想要的顺序执行，其很有可能先执行 14 行，再依次赋值。因此我们需要内存和优化屏障。Linux Kernel 已经封装了 &lt;code&gt;rcu_assign_pointer&lt;/code&gt; 帮我们实现上述过程。其能保证下面代码先赋值 abc 结束后，再对 gp 赋值。&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Linux Kernel 内核同步之自旋锁</title>
       <link>https://blog.jaxwang.top/p/linux-kernel-synchronization-spinlock/</link>
