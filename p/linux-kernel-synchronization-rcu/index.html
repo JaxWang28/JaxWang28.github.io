@@ -1,67 +1,46 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8">
+    <title>Linux Kernel 内核同步之 RCU</title>
+    <meta name="description" content="Linux Kernel 内核同步之 RCU">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Linux Kernel 内核同步之 RCU | Jackson Blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     <link rel="stylesheet" href="/css/github-markdown-light.css" />
     
-<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
-<link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
 
-
-      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
-      <script>
-        var doNotTrack = false;
-        if ( false ) {
-          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
-          var doNotTrack = (dnt == "1" || dnt == "yes");
-        }
-        if (!doNotTrack) {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '7S26TLKGMX');
-        }
-      </script>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-  <meta name="referrer" content="no-referrer-when-downgrade">
   </head>
 
   <body>
     <nav>
-    <ul class="menu">
-      
-      <li><a href="/">Home</a></li>
-      
-      <li><a href="/post/">Posts</a></li>
-      
-      <li><a href="/categories/">Categories</a></li>
-      
-      <li><a href="/tags/">Tags</a></li>
-      
-      <li><a href="/about/">About</a></li>
-      
-      <li><a href="/bookshelf">Bookshelf</a></li>
-      
-      <li><a href="/index.xml">RSS</a></li>
-      
-    </ul>
-    <hr/>
+      <ul class="menu">
+        
+        <li><a href="/">Home</a></li>
+        
+        <li><a href="/post/">Posts</a></li>
+        
+        <li><a href="/categories/">Categories</a></li>
+        
+        <li><a href="/tags/">Tags</a></li>
+        
+        <li><a href="/about/">About</a></li>
+        
+        <li><a href="/bookshelf">Bookshelf</a></li>
+        
+        <li><a href="/index.xml">RSS</a></li>
+        
+      </ul>
+      <hr/>
     </nav>
 
 <div style="margin-left: auto; margin-right: 0; text-align: right;" >
   📅
    2025/05/20 
-  &nbsp
-
-  <span id="busuanzi_container_page_pv">
-  👀<span id="busuanzi_value_page_pv"></span>
-  </span> 
 </div>
 <div class="markdown-box">
 <main class="markdown-body">
@@ -95,7 +74,7 @@
 <ol>
 <li>Updateer <code>rcu_assign_pointer</code></li>
 </ol>
-<pre><code>  1 struct foo {
+<pre tabindex="0"><code>  1 struct foo {
   2   int a;
   3   int b;
   4   int c;
@@ -109,32 +88,28 @@
  12 p-&gt;b = 2;
  13 p-&gt;c = 3;
  14 gp = p;
-</code></pre>
-<p>根据优化和内存屏障部分我们知道 11 12 13 14 行代码不一定按照我们想要的顺序执行，其很有可能先执行 14 行，再依次赋值。因此我们需要内存和优化屏障。Linux Kernel 已经封装了 <code>rcu_assign_pointer</code> 帮我们实现上述过程。其能保证下面代码先赋值 abc 结束后，再对 gp 赋值。</p>
-<pre><code>  1 p-&gt;a = 1;
+</code></pre><p>根据优化和内存屏障部分我们知道 11 12 13 14 行代码不一定按照我们想要的顺序执行，其很有可能先执行 14 行，再依次赋值。因此我们需要内存和优化屏障。Linux Kernel 已经封装了 <code>rcu_assign_pointer</code> 帮我们实现上述过程。其能保证下面代码先赋值 abc 结束后，再对 gp 赋值。</p>
+<pre tabindex="0"><code>  1 p-&gt;a = 1;
   2 p-&gt;b = 2;
   3 p-&gt;c = 3;
   4 rcu_assign_pointer(gp, p);
-</code></pre>
-<ol start="2">
+</code></pre><ol start="2">
 <li><code>rcu_read_lock</code></li>
 <li><code>rcu_read_unlock</code></li>
 <li><code>rcu_dereference</code></li>
 </ol>
-<pre><code>  1 p = gp;
+<pre tabindex="0"><code>  1 p = gp;
   2 if (p != NULL) {
   3   do_something_with(p-&gt;a, p-&gt;b, p-&gt;c);
   4 }
-</code></pre>
-<p>同样，我们在读取端也要有类似的操作，同时读取端还要通过上锁，保证访问内容暂时不要被回收（旧作业）。</p>
-<pre><code>  1 rcu_read_lock();
+</code></pre><p>同样，我们在读取端也要有类似的操作，同时读取端还要通过上锁，保证访问内容暂时不要被回收（旧作业）。</p>
+<pre tabindex="0"><code>  1 rcu_read_lock();
   2 p = rcu_dereference(gp);
   3 if (p != NULL) {
   4   do_something_with(p-&gt;a, p-&gt;b, p-&gt;c);
   5 }
   6 rcu_read_unlock();
-</code></pre>
-<ol start="5">
+</code></pre><ol start="5">
 <li><code>synchronize_rcu</code> <code>call_rcu</code>
 用于回收旧资源，启用 <code>synchronize_rcu</code> 是同步，其会 block 等待旧资源上所有的锁都释放，<code>call_rcu</code> 是异步。</li>
 </ol>
@@ -149,41 +124,12 @@
 
 <br>
 
-<script src="https://giscus.app/client.js"
-        data-repo="JaxWang28/Blog"
-        data-repo-id="R_kgDOIbrexg"
-        data-category="Announcements"
-        data-category-id="DIC_kwDOIbrexs4CSjN8"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="bottom"
-        data-theme="light"
-        data-lang="zh-CN"
-        crossorigin="anonymous"
-        async>
-</script>
-
   <footer>
   <hr/>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
-<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
-
-<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
-
-
-<div class="busuanzi-footer">
-  <span id="busuanzi_container_site_pv">
-    总访问量 <span id="busuanzi_value_site_pv"></span> 次
-  </span>
-  <span id="busuanzi_container_site_uv">
-    访客数 <span id="busuanzi_value_site_uv"></span> 人次
-  </span>
-</div>
+  
   
   <hr/>
-  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2017 &ndash; 2025 | <a href="https://github.com/jaxwang28">Github</a>
+  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2022 &ndash; 2025 | <a href="https://github.com/jaxwang28">Github</a>
   
   </footer>
   </body>

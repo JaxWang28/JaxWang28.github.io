@@ -1,73 +1,52 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8">
+    <title>Linux Kernel 内核同步之原子操作</title>
+    <meta name="description" content="Linux Kernel 内核同步之原子操作">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Linux Kernel 内核同步之原子操作 | Jackson Blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     <link rel="stylesheet" href="/css/github-markdown-light.css" />
     
-<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
-<link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
 
-
-      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
-      <script>
-        var doNotTrack = false;
-        if ( false ) {
-          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
-          var doNotTrack = (dnt == "1" || dnt == "yes");
-        }
-        if (!doNotTrack) {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '7S26TLKGMX');
-        }
-      </script>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-  <meta name="referrer" content="no-referrer-when-downgrade">
   </head>
 
   <body>
     <nav>
-    <ul class="menu">
-      
-      <li><a href="/">Home</a></li>
-      
-      <li><a href="/post/">Posts</a></li>
-      
-      <li><a href="/categories/">Categories</a></li>
-      
-      <li><a href="/tags/">Tags</a></li>
-      
-      <li><a href="/about/">About</a></li>
-      
-      <li><a href="/bookshelf">Bookshelf</a></li>
-      
-      <li><a href="/index.xml">RSS</a></li>
-      
-    </ul>
-    <hr/>
+      <ul class="menu">
+        
+        <li><a href="/">Home</a></li>
+        
+        <li><a href="/post/">Posts</a></li>
+        
+        <li><a href="/categories/">Categories</a></li>
+        
+        <li><a href="/tags/">Tags</a></li>
+        
+        <li><a href="/about/">About</a></li>
+        
+        <li><a href="/bookshelf">Bookshelf</a></li>
+        
+        <li><a href="/index.xml">RSS</a></li>
+        
+      </ul>
+      <hr/>
     </nav>
 
 <div style="margin-left: auto; margin-right: 0; text-align: right;" >
   📅
    2025/05/18 
-  &nbsp
-
-  <span id="busuanzi_container_page_pv">
-  👀<span id="busuanzi_value_page_pv"></span>
-  </span> 
 </div>
 <div class="markdown-box">
 <main class="markdown-body">
 <h1 id="linux-kernel-内核同步之原子操作">Linux Kernel 内核同步之原子操作</h1>
 <p>原子操作是指指令以原子的方式执行，执行过程不会被打断。要保证操作的原子性和完整性，需要“原子地”（不间断地）完整<strong>读-修改-回写</strong>机制。</p>
-<pre><code>static int i = 0;
+<pre tabindex="0"><code>static int i = 0;
 void thread_A _func()
 {
 	i++;
@@ -76,8 +55,7 @@ void thread_B _func()
 {
 	i++;
 }
-</code></pre>
-<p>上面代码的理想执行结果是<code>i</code> 为 2，但事实并非如此， i 有一定的概率为 1。对于 <code>thread_A</code> 和 <code>thread_B</code> 进行的操作可以简单理解为：<strong>读 - 修改 - 回写</strong>。从单处理器和多处理器角度分析：</p>
+</code></pre><p>上面代码的理想执行结果是<code>i</code> 为 2，但事实并非如此， i 有一定的概率为 1。对于 <code>thread_A</code> 和 <code>thread_B</code> 进行的操作可以简单理解为：<strong>读 - 修改 - 回写</strong>。从单处理器和多处理器角度分析：</p>
 <ul>
 <li>单处理器：<code>thread_A</code> 与 <code>thread_B</code> 存在并发，当 <code>thread_A</code> 执行完 <code>读</code> 操作，CPU 有可能切换为 <code>thread_B</code> 执行 <code>读</code> 操作，这样最终的结果为 1.</li>
 <li>多处理器：<code>thread_A</code> 与 <code>thread_B</code> 存在并发，<code>thread_A</code> 与 <code>thread_B</code> 可能同时执行 <code>读</code> 操作，这样最终结果也为 1.</li>
@@ -103,18 +81,30 @@ void thread_B _func()
 <li><code>LDXR</code>：独占内存加载指令，其以独占方式加载内存地址的值到通用寄存器</li>
 <li><code>STXR</code>：独占内存存储指令，其以独占方式把数据存储到内存中</li>
 </ul>
-<pre><code class="language-ASM">ldxr &lt;xt&gt;， [xn | sp]
-</code></pre>
-<p>以上是 <code>LDXR</code> 原型，其把 <code>Xn</code> 或 <code>SP</code> 地址的值原子地加载到 <code>Xt</code> 寄存器里。</p>
-<pre><code class="language-ASM">stxr &lt;ws&gt; &lt;xt&gt; [xn | sp]
-</code></pre>
-<p>以上是 <code>STXR</code> 原型，其<strong>把 <code>Xt</code> 寄存器的值原子地存储到 <code>Xn</code> 或者 <code>SP</code> 地址里，执行的结果反映到 <code>Ws</code> 寄存器中</strong>：</p>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ASM" data-lang="ASM"><span style="display:flex;"><span><span style="color:#a6e22e">ldxr</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">xt</span><span style="color:#960050;background-color:#1e0010">&gt;，</span> [<span style="color:#66d9ef">xn</span> <span style="color:#960050;background-color:#1e0010">|</span> <span style="color:#66d9ef">sp</span>]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>以上是 <code>LDXR</code> 原型，其把 <code>Xn</code> 或 <code>SP</code> 地址的值原子地加载到 <code>Xt</code> 寄存器里。</p>
+<div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ASM" data-lang="ASM"><span style="display:flex;"><span><span style="color:#a6e22e">stxr</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">ws</span><span style="color:#960050;background-color:#1e0010">&gt;</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">xt</span><span style="color:#960050;background-color:#1e0010">&gt;</span> [<span style="color:#66d9ef">xn</span> <span style="color:#960050;background-color:#1e0010">|</span> <span style="color:#66d9ef">sp</span>]
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>以上是 <code>STXR</code> 原型，其<strong>把 <code>Xt</code> 寄存器的值原子地存储到 <code>Xn</code> 或者 <code>SP</code> 地址里，执行的结果反映到 <code>Ws</code> 寄存器中</strong>：</p>
 <ul>
 <li>若 <code>Ws</code> 寄存器的值为 0, 则说明这段时间内没有其它处理器修改过该内存地址中的内容，写入成功。</li>
 <li>若 <code>Ws</code> 寄存器的值为 1, 则说明这段时间内有其它处理器修改过该内存地址中的内容，写入失败，此时需要跳转到 <code>LDXR</code> 处重复上述过程。</li>
 </ul>
 <p>以下是一个使用独占内存访问指令实现的原子加法：</p>
-<pre><code>typedef struct {
+<pre tabindex="0"><code>typedef struct {
 	int counter;
 } atomic_t;
  // LXDR 独占方式加载
@@ -122,17 +112,16 @@ void atomic_add(int i, atomic_t *v)
 {
 	unsigned long tmp;
 	int result;
-	asm volatile(&quot;// atomic_add\n&quot;  
-	&quot;1: ldxr%w0, [%2]\n&quot;            // 读：原子加载 v-&gt;counter
-	&quot; add%w0, %w0, %w3\n&quot;           // 修改：+ i
-	&quot; stxr%w1, %w0, [%2]\n&quot;         // 回写：原子存储到 v-&gt;counter
-	&quot; cbnz%w1, 1b&quot;                  // 如果失败则重复上面过程
-	: &quot;=&amp;r&quot; (result), &quot;=&amp;r&quot; (tmp)
-	: &quot;r&quot; (&amp;v-&gt;counter), &quot;Ir&quot; (i)
-	: &quot;cc&quot;);
+	asm volatile(&#34;// atomic_add\n&#34;  
+	&#34;1: ldxr%w0, [%2]\n&#34;            // 读：原子加载 v-&gt;counter
+	&#34; add%w0, %w0, %w3\n&#34;           // 修改：+ i
+	&#34; stxr%w1, %w0, [%2]\n&#34;         // 回写：原子存储到 v-&gt;counter
+	&#34; cbnz%w1, 1b&#34;                  // 如果失败则重复上面过程
+	: &#34;=&amp;r&#34; (result), &#34;=&amp;r&#34; (tmp)
+	: &#34;r&#34; (&amp;v-&gt;counter), &#34;Ir&#34; (i)
+	: &#34;cc&#34;);
 }
-</code></pre>
-<h3 id="原子内存访问操作指令">原子内存访问操作指令</h3>
+</code></pre><h3 id="原子内存访问操作指令">原子内存访问操作指令</h3>
 <p>在 ARMv8.1 体系结构中新增了原子内存访问操作指令 atomic memory access instruction，也被称为 LSE Large System Extension</p>
 <p>本文不对细节进行深究，只需知道下面指令</p>
 <p>原子加载（atomic load）指令：加载地址中的值并保存，做运算</p>
@@ -149,14 +138,12 @@ void atomic_add(int i, atomic_t *v)
 </li>
 <li>交换指令</li>
 </ul>
-<pre><code>ld&lt;op&gt; &lt;xs&gt;, &lt;xt&gt;, [&lt;xn|sp&gt;]
-</code></pre>
-<p>以上为原子加载指令的原型，ld 后紧跟操作，其表示：</p>
-<pre><code>tmp = *xn        // 取 xn 地址中的值
+<pre tabindex="0"><code>ld&lt;op&gt; &lt;xs&gt;, &lt;xt&gt;, [&lt;xn|sp&gt;]
+</code></pre><p>以上为原子加载指令的原型，ld 后紧跟操作，其表示：</p>
+<pre tabindex="0"><code>tmp = *xn        // 取 xn 地址中的值
 *xn = *xn op xs  // 与 xs 寄存器中的值 op 操作后回写
 xt = tmp         // 返回旧值
-</code></pre>
-<table>
+</code></pre><table>
   <thead>
       <tr>
           <th>原子操作后缀</th>
@@ -200,15 +187,14 @@ xt = tmp         // 返回旧值
 </table>
 <h2 id="二linux-kernel-原子操作">二、Linux Kernel 原子操作</h2>
 <p>接下来从 Linux 源码角度分析原子操作。正如前文所言 ARMv8 支持两种形式的原子操作 <code>LD/SC</code> 和 <code>LSE</code>，在 Linux Kernel 中的体现如下：</p>
-<pre><code>// arch/arm64/include/asm/atomic.h
+<pre tabindex="0"><code>// arch/arm64/include/asm/atomic.h
 
 #define ATOMIC_OP(op)							                \
 static __always_inline void arch_##op(int i, atomic_t *v)		\
 {									                            \
 	__lse_ll_sc_body(op, i, v);					                \
 }
-</code></pre>
-<pre><code>// arch/arm64/include/asm/lse.h
+</code></pre><pre tabindex="0"><code>// arch/arm64/include/asm/lse.h
 
 #define __lse_ll_sc_body(op, ...)					        \
 ({									                        \
@@ -216,10 +202,9 @@ static __always_inline void arch_##op(int i, atomic_t *v)		\
 		__lse_##op(__VA_ARGS__) :				            \
 		__ll_sc_##op(__VA_ARGS__);				            \
 })
-</code></pre>
-<p>对于一个原子操作 <code>op</code> 内核会在 <code>__lse_ll_sc_body</code> 中判断其是否支持 <code>LSE</code>，如果支持则使用 <code>LSE</code> 方式，接下来我们分别从 <code>LSE</code> 和 <code>LD/SC</code> 角度分析。</p>
+</code></pre><p>对于一个原子操作 <code>op</code> 内核会在 <code>__lse_ll_sc_body</code> 中判断其是否支持 <code>LSE</code>，如果支持则使用 <code>LSE</code> 方式，接下来我们分别从 <code>LSE</code> 和 <code>LD/SC</code> 角度分析。</p>
 <p><strong>Linux Kernel 原子操作的 LD/SC 实现</strong></p>
-<pre><code>// arch/arm64/include/asm/atomic_ll_sc.h
+<pre tabindex="0"><code>// arch/arm64/include/asm/atomic_ll_sc.h
 
 
 /*
@@ -235,22 +220,20 @@ __ll_sc_atomic_##op(int i, atomic_t *v)					\
 	unsigned long tmp;						            \
 	int result;							                \
 									                    \
-	asm volatile(&quot;// atomic_&quot; #op &quot;\n&quot;				    \
-	&quot;	prfm	pstl1strm, %2\n&quot;				        \
-	&quot;1:	ldxr	%w0, %2\n&quot;					            \
-	&quot;	&quot; #asm_op &quot;	%w0, %w0, %w3\n&quot;			        \
-	&quot;	stxr	%w1, %w0, %2\n&quot;					        \
-	&quot;	cbnz	%w1, 1b\n&quot;					            \
-	: &quot;=&amp;r&quot; (result), &quot;=&amp;r&quot; (tmp), &quot;+Q&quot; (v-&gt;counter)	\
-	: __stringify(constraint) &quot;r&quot; (i));				    \
+	asm volatile(&#34;// atomic_&#34; #op &#34;\n&#34;				    \
+	&#34;	prfm	pstl1strm, %2\n&#34;				        \
+	&#34;1:	ldxr	%w0, %2\n&#34;					            \
+	&#34;	&#34; #asm_op &#34;	%w0, %w0, %w3\n&#34;			        \
+	&#34;	stxr	%w1, %w0, %2\n&#34;					        \
+	&#34;	cbnz	%w1, 1b\n&#34;					            \
+	: &#34;=&amp;r&#34; (result), &#34;=&amp;r&#34; (tmp), &#34;+Q&#34; (v-&gt;counter)	\
+	: __stringify(constraint) &#34;r&#34; (i));				    \
 }
-</code></pre>
-<p><strong>Linux Kernel 原子操作的 LSE 实现</strong></p>
-<pre><code>// arch/arm64/include/asm/lse.h
+</code></pre><p><strong>Linux Kernel 原子操作的 LSE 实现</strong></p>
+<pre tabindex="0"><code>// arch/arm64/include/asm/lse.h
 
-#define __LSE_PREAMBLE	&quot;.arch_extension lse\n&quot;
-</code></pre>
-<pre><code>// arch/arm64/include/asm/atomic_lse.h
+#define __LSE_PREAMBLE	&#34;.arch_extension lse\n&#34;
+</code></pre><pre tabindex="0"><code>// arch/arm64/include/asm/atomic_lse.h
 
 #define ATOMIC64_OP(op, asm_op)						    \
 static __always_inline void						        \
@@ -258,12 +241,11 @@ __lse_atomic64_##op(s64 i, atomic64_t *v)				\
 {									                    \
 	asm volatile(							            \
 	__LSE_PREAMBLE							            \
-	&quot;	&quot; #asm_op &quot;	%[i], %[v]\n&quot;				        \
-	: [v] &quot;+Q&quot; (v-&gt;counter)						        \
-	: [i] &quot;r&quot; (i));							            \
+	&#34;	&#34; #asm_op &#34;	%[i], %[v]\n&#34;				        \
+	: [v] &#34;+Q&#34; (v-&gt;counter)						        \
+	: [i] &#34;r&#34; (i));							            \
 }
-</code></pre>
-<h2 id="references">References</h2>
+</code></pre><h2 id="references">References</h2>
 <p>[1] Bovet, Daniel P., and Marco Cesati. <em>Understanding the Linux Kernel</em>. 3rd ed, O’Reilly, 2006.</p>
 <p>[2] 奔跑吧Linux社区.ARM64体系结构编程与实践.2022.</p>
 
@@ -272,41 +254,12 @@ __lse_atomic64_##op(s64 i, atomic64_t *v)				\
 
 <br>
 
-<script src="https://giscus.app/client.js"
-        data-repo="JaxWang28/Blog"
-        data-repo-id="R_kgDOIbrexg"
-        data-category="Announcements"
-        data-category-id="DIC_kwDOIbrexs4CSjN8"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="bottom"
-        data-theme="light"
-        data-lang="zh-CN"
-        crossorigin="anonymous"
-        async>
-</script>
-
   <footer>
   <hr/>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
-<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
-
-<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
-
-
-<div class="busuanzi-footer">
-  <span id="busuanzi_container_site_pv">
-    总访问量 <span id="busuanzi_value_site_pv"></span> 次
-  </span>
-  <span id="busuanzi_container_site_uv">
-    访客数 <span id="busuanzi_value_site_uv"></span> 人次
-  </span>
-</div>
+  
   
   <hr/>
-  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2017 &ndash; 2025 | <a href="https://github.com/jaxwang28">Github</a>
+  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2022 &ndash; 2025 | <a href="https://github.com/jaxwang28">Github</a>
   
   </footer>
   </body>

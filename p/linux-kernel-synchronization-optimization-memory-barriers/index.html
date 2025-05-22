@@ -1,67 +1,46 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8">
+    <title>Linux Kernel 内核同步之优化和内存屏障</title>
+    <meta name="description" content="Linux Kernel 内核同步之优化和内存屏障">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Linux Kernel 内核同步之优化和内存屏障 | Jackson Blog</title>
     <link rel="stylesheet" href="/css/style.css" />
     <link rel="stylesheet" href="/css/fonts.css" />
     <link rel="stylesheet" href="/css/github-markdown-light.css" />
     
-<link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
-<link rel="manifest" href="/favicon/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
 
-
-      <script async src="https://www.googletagmanager.com/gtag/js?id=7S26TLKGMX"></script>
-      <script>
-        var doNotTrack = false;
-        if ( false ) {
-          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
-          var doNotTrack = (dnt == "1" || dnt == "yes");
-        }
-        if (!doNotTrack) {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '7S26TLKGMX');
-        }
-      </script>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-  <meta name="referrer" content="no-referrer-when-downgrade">
   </head>
 
   <body>
     <nav>
-    <ul class="menu">
-      
-      <li><a href="/">Home</a></li>
-      
-      <li><a href="/post/">Posts</a></li>
-      
-      <li><a href="/categories/">Categories</a></li>
-      
-      <li><a href="/tags/">Tags</a></li>
-      
-      <li><a href="/about/">About</a></li>
-      
-      <li><a href="/bookshelf">Bookshelf</a></li>
-      
-      <li><a href="/index.xml">RSS</a></li>
-      
-    </ul>
-    <hr/>
+      <ul class="menu">
+        
+        <li><a href="/">Home</a></li>
+        
+        <li><a href="/post/">Posts</a></li>
+        
+        <li><a href="/categories/">Categories</a></li>
+        
+        <li><a href="/tags/">Tags</a></li>
+        
+        <li><a href="/about/">About</a></li>
+        
+        <li><a href="/bookshelf">Bookshelf</a></li>
+        
+        <li><a href="/index.xml">RSS</a></li>
+        
+      </ul>
+      <hr/>
     </nav>
 
 <div style="margin-left: auto; margin-right: 0; text-align: right;" >
   📅
    2025/05/19 
-  &nbsp
-
-  <span id="busuanzi_container_page_pv">
-  👀<span id="busuanzi_value_page_pv"></span>
-  </span> 
 </div>
 <div class="markdown-box">
 <main class="markdown-body">
@@ -69,7 +48,7 @@
 <p>Linux Kernel 是支持优化屏障和内存屏障的，其中优化屏障是针对<strong>编译器</strong>而言的，内存屏障是针对<strong>处理器</strong>而言的，因此内存屏障取决于处理器架构。本文以 <code>ARMv8</code> 架构处理器从下向上讲解内存屏障，并简述优化屏障。</p>
 <h2 id="一linux-kernel-优化屏障">一、Linux Kernel 优化屏障</h2>
 <p>编译器在编译源代码时会考虑性能进行优化重新排序指令顺序，以下面代码为例：</p>
-<pre><code>volatile int a = 0;
+<pre tabindex="0"><code>volatile int a = 0;
 volatile int b = 0;
 
 void no_barrier() {
@@ -79,13 +58,11 @@ void no_barrier() {
 
 void with_barrier() {
     a = 1;
-    asm volatile(&quot;&quot; ::: &quot;memory&quot;);  // 编译器优化屏障
+    asm volatile(&#34;&#34; ::: &#34;memory&#34;);  // 编译器优化屏障
     b = 2;
 }
-</code></pre>
-<pre><code>aarch64-none-linux-gnu-gcc -S test.c -O3  -o test.s
-</code></pre>
-<pre><code>no_barrier:
+</code></pre><pre tabindex="0"><code>aarch64-none-linux-gnu-gcc -S test.c -O3  -o test.s
+</code></pre><pre tabindex="0"><code>no_barrier:
 .LFB0:
         .cfi_startproc
         adrp    x0, .LANCHOR0
@@ -96,8 +73,7 @@ void with_barrier() {
         str     w2, [x1, 4]
         ret
         .cfi_endproc
-</code></pre>
-<pre><code>with_barrier:
+</code></pre><pre tabindex="0"><code>with_barrier:
 .LFB1:
         .cfi_startproc
         adrp    x0, .LANCHOR0
@@ -108,22 +84,20 @@ void with_barrier() {
         str     w0, [x1, 4]
         ret
         .cfi_endproc
-</code></pre>
-<p>我们只需观察 <code>mov</code> <code>str</code> 指令的顺序：</p>
+</code></pre><p>我们只需观察 <code>mov</code> <code>str</code> 指令的顺序：</p>
 <ul>
 <li><code>no_barrier</code> 情况下是往两个寄存器中存值，再统一存储到内存中。<code>mov</code> - <code>mov</code> - <code>str</code> -<code>str</code></li>
 <li><code>with_barrier</code> 情况下是一个接一个存储到内存中。 <code>mov</code> - <code>str</code> - <code>mov</code> - <code>str</code></li>
 </ul>
 <p>优化屏障是针对编译器而言，我们可以在 <code>compiler.h</code> 中找到 kernel 提供的优化屏障宏 <code>barrier()</code></p>
-<pre><code>// include/linux/compiler.h
+<pre tabindex="0"><code>// include/linux/compiler.h
 
 /* Optimization barrier */
 #ifndef barrier
-/* The &quot;volatile&quot; is due to gcc bugs */
-# define barrier() __asm__ __volatile__(&quot;&quot;: : :&quot;memory&quot;)
+/* The &#34;volatile&#34; is due to gcc bugs */
+# define barrier() __asm__ __volatile__(&#34;&#34;: : :&#34;memory&#34;)
 #endif
-</code></pre>
-<h2 id="二内存屏障">二、内存屏障</h2>
+</code></pre><h2 id="二内存屏障">二、内存屏障</h2>
 <p>现代处理器普遍采用超标量（superscalar）[1]架构、 乱序执行（out-of-order execution）[2] 等技术来提高指令级并行效率，因此指令的执行顺序在处理器流水线中很可能被打乱，与程序代码编写时的序列不一致。</p>
 <p>在一个单处理器系统里面，不管 CPU 怎么乱序执行，它最终的执行结果都是程序员想要的结果，也就是类似于顺序执行模型。但是在多核处理器系统中，一个 CPU 内核中内存访问的乱序执行可能会对系统中其他的观察者（例如其他内核）产生影响，即它们可能观察到的内 CPU 存执行次序与实际执行次序有很大的不同，特别是多核并发访问共享数据的情况下。</p>
 <p>对此，引出<strong>存储一致性</strong>问题，即系统中所有处理器所看到的对不同地址访问的次序问题。</p>
@@ -134,7 +108,7 @@ void with_barrier() {
 </ol>
 <p><em>这里不对相关理论知识进行展开，感兴趣的读者可以在 Refercences [2] 中找到一些理论知识。</em></p>
 <p>抽象出下面的一个系统模型为例子 [3] 并举例说明乱序带来的影响：</p>
-<pre><code>		            :                :
+<pre tabindex="0"><code>		            :                :
 		            :                :
 		            :                :
 		+-------+   :   +--------+   :   +-------+
@@ -156,16 +130,14 @@ void with_barrier() {
 		            :   |        |   :
 		            :   +--------+   :
 		            :                :
-</code></pre>
-<p>假设 CPU 流水线上的指令序列如下：</p>
-<pre><code>    CPU 1           CPU 2
+</code></pre><p>假设 CPU 流水线上的指令序列如下：</p>
+<pre tabindex="0"><code>    CPU 1           CPU 2
     ===============	===============
     { A == 1; B == 2 }
     A = 3;		    x = B;
     B = 4;		    y = A;
-</code></pre>
-<p>CPU 1 需要执行两条指令 <code>A = 3</code> <code>B = 4</code>， CPU 2 需要执行两条指令 <code>x = B</code> <code>y = A</code>。各 CPU 上执行顺序并不是代码所见，因为时乱序执行所以会有 24 种可能性。</p>
-<pre><code>	STORE A=3,    STORE B=4,      y=LOAD A-&gt;3,    x=LOAD B-&gt;4
+</code></pre><p>CPU 1 需要执行两条指令 <code>A = 3</code> <code>B = 4</code>， CPU 2 需要执行两条指令 <code>x = B</code> <code>y = A</code>。各 CPU 上执行顺序并不是代码所见，因为时乱序执行所以会有 24 种可能性。</p>
+<pre tabindex="0"><code>	STORE A=3,    STORE B=4,      y=LOAD A-&gt;3,    x=LOAD B-&gt;4
 	STORE A=3,    STORE B=4,      x=LOAD B-&gt;4,    y=LOAD A-&gt;3
 	STORE A=3,    y=LOAD A-&gt;3,    STORE B=4,      x=LOAD B-&gt;4
 	STORE A=3,    y=LOAD A-&gt;3,    x=LOAD B-&gt;2,    STORE B=4
@@ -174,8 +146,7 @@ void with_barrier() {
 	STORE B=4,    STORE A=3,      y=LOAD A-&gt;3,    x=LOAD B-&gt;4
 	STORE B=4, ...
 	...
-</code></pre>
-<h2 id="三arm64-中的内存屏障指令">三、ARM64 中的内存屏障指令</h2>
+</code></pre><h2 id="三arm64-中的内存屏障指令">三、ARM64 中的内存屏障指令</h2>
 <p>ARM64 处理器采用<strong>弱一致性内存模型</strong>，在该内存模型下，CPU的加载和存储访问的序列有可能和程序中的序列不一致。因此 ARM64 处理器使用内存屏障指令实现同步访问，内存屏障指令有以下原则：</p>
 <ol>
 <li>在内存屏障指令后面的所有数据访问必须等待内存屏障指令</li>
@@ -207,7 +178,7 @@ void with_barrier() {
 <h3 id="isb-内存屏障指令">ISB 内存屏障指令</h3>
 <p>ISB 指令会冲刷流水线，然后从指令高速缓存或者内存中重新预取指令。</p>
 <h2 id="四linux-kernel-内存屏障">四、Linux Kernel 内存屏障</h2>
-<pre><code>// include/asm-generic/barrier.h
+<pre tabindex="0"><code>// include/asm-generic/barrier.h
 
 /*
  * Architectures that want generic instrumentation can define __ prefixed
@@ -237,12 +208,11 @@ void with_barrier() {
 #ifdef __dma_wmb
 #define dma_wmb()	do { kcsan_wmb(); __dma_wmb(); } while (0)
 #endif
-</code></pre>
-<pre><code>// arch/arm64/include/asm/barrier.h
+</code></pre><pre tabindex="0"><code>// arch/arm64/include/asm/barrier.h
 
-#define isb()		asm volatile(&quot;isb&quot; : : : &quot;memory&quot;)
-#define dmb(opt)	asm volatile(&quot;dmb &quot; #opt : : : &quot;memory&quot;)
-#define dsb(opt)	asm volatile(&quot;dsb &quot; #opt : : : &quot;memory&quot;)
+#define isb()		asm volatile(&#34;isb&#34; : : : &#34;memory&#34;)
+#define dmb(opt)	asm volatile(&#34;dmb &#34; #opt : : : &#34;memory&#34;)
+#define dsb(opt)	asm volatile(&#34;dsb &#34; #opt : : : &#34;memory&#34;)
 
 #define __mb()		dsb(sy)
 #define __rmb()		dsb(ld)
@@ -255,8 +225,7 @@ void with_barrier() {
 #define __smp_mb()	dmb(ish)
 #define __smp_rmb()	dmb(ishld)
 #define __smp_wmb()	dmb(ishst)
-</code></pre>
-<p><em>TODO： READ_ONCE() WIRTE_ONCE()</em></p>
+</code></pre><p><em>TODO： READ_ONCE() WIRTE_ONCE()</em></p>
 <p><em>TODO：dmb_mb 等用法</em></p>
 <h2 id="references">References</h2>
 <p>[1] Superscalar processor - Wiki <a href="https://en.wikipedia.org/wiki/Superscalar_processor">https://en.wikipedia.org/wiki/Superscalar_processor</a></p>
@@ -268,41 +237,12 @@ void with_barrier() {
 
 <br>
 
-<script src="https://giscus.app/client.js"
-        data-repo="JaxWang28/Blog"
-        data-repo-id="R_kgDOIbrexg"
-        data-category="Announcements"
-        data-category-id="DIC_kwDOIbrexs4CSjN8"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="bottom"
-        data-theme="light"
-        data-lang="zh-CN"
-        crossorigin="anonymous"
-        async>
-</script>
-
   <footer>
   <hr/>
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
-<script src="//cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
-
-<script src="//cdn.jsdelivr.net/npm/@xiee/utils/js/center-img.min.js" defer></script>
-
-
-<div class="busuanzi-footer">
-  <span id="busuanzi_container_site_pv">
-    总访问量 <span id="busuanzi_value_site_pv"></span> 次
-  </span>
-  <span id="busuanzi_container_site_uv">
-    访客数 <span id="busuanzi_value_site_uv"></span> 人次
-  </span>
-</div>
+  
   
   <hr/>
-  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2017 &ndash; 2025 | <a href="https://github.com/jaxwang28">Github</a>
+  © <a href="https://jaxwang28.github.io">Jackson Wang</a> 2022 &ndash; 2025 | <a href="https://github.com/jaxwang28">Github</a>
   
   </footer>
   </body>
