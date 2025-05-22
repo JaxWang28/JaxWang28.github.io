@@ -2,10 +2,10 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on Jackson Blog</title>
-    <link>https://blog.jaxwang.top/categories/</link>
+    <link>https://blog.jaxwang28.top/categories/</link>
     <description>Recent content in Categories on Jackson Blog</description>
     <generator>Hugo</generator>
     <language>zh-CN</language>
-    <atom:link href="https://blog.jaxwang.top/categories/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://blog.jaxwang28.top/categories/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>
