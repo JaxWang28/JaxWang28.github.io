@@ -2,7 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://blog.jaxwang28.top/categories/</loc>
+    <lastmod>2025-05-20T20:37:06+08:00</lastmod>
+  </url><url>
     <loc>https://blog.jaxwang28.top/</loc>
+    <lastmod>2025-05-20T20:37:06+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang28.top/categories/kernel/</loc>
     <lastmod>2025-05-20T20:37:06+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang28.top/tags/kernel/</loc>
@@ -35,6 +41,9 @@
     <loc>https://blog.jaxwang28.top/tags/protocol/</loc>
     <lastmod>2025-05-16T14:12:00+08:00</lastmod>
   </url><url>
+    <loc>https://blog.jaxwang28.top/categories/protocol/</loc>
+    <lastmod>2025-05-16T12:12:00+08:00</lastmod>
+  </url><url>
     <loc>https://blog.jaxwang28.top/p/rs232-protocol/</loc>
     <lastmod>2025-05-16T12:12:00+08:00</lastmod>
   </url><url>
@@ -49,6 +58,9 @@
   </url><url>
     <loc>https://blog.jaxwang28.top/tags/memorymamagemtn/</loc>
     <lastmod>2025-04-29T16:30:00+08:00</lastmod>
+  </url><url>
+    <loc>https://blog.jaxwang28.top/categories/debug/</loc>
+    <lastmod>2025-04-19T21:45:06+08:00</lastmod>
   </url><url>
     <loc>https://blog.jaxwang28.top/tags/debug/</loc>
     <lastmod>2025-04-19T21:45:06+08:00</lastmod>
@@ -65,7 +77,5 @@
     <loc>https://blog.jaxwang28.top/about/</loc>
   </url><url>
     <loc>https://blog.jaxwang28.top/bookshelf/</loc>
-  </url><url>
-    <loc>https://blog.jaxwang28.top/categories/</loc>
   </url>
 </urlset>
