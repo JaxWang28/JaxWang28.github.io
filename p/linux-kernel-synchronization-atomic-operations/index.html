@@ -81,24 +81,10 @@ void thread_B _func()
 <li><code>LDXR</code>：独占内存加载指令，其以独占方式加载内存地址的值到通用寄存器</li>
 <li><code>STXR</code>：独占内存存储指令，其以独占方式把数据存储到内存中</li>
 </ul>
-<div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ASM" data-lang="ASM"><span style="display:flex;"><span><span style="color:#a6e22e">ldxr</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">xt</span><span style="color:#960050;background-color:#1e0010">&gt;，</span> [<span style="color:#66d9ef">xn</span> <span style="color:#960050;background-color:#1e0010">|</span> <span style="color:#66d9ef">sp</span>]
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>以上是 <code>LDXR</code> 原型，其把 <code>Xn</code> 或 <code>SP</code> 地址的值原子地加载到 <code>Xt</code> 寄存器里。</p>
-<div class="highlight"><div style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
-<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">1
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ASM" data-lang="ASM"><span style="display:flex;"><span><span style="color:#a6e22e">stxr</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">ws</span><span style="color:#960050;background-color:#1e0010">&gt;</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">xt</span><span style="color:#960050;background-color:#1e0010">&gt;</span> [<span style="color:#66d9ef">xn</span> <span style="color:#960050;background-color:#1e0010">|</span> <span style="color:#66d9ef">sp</span>]
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>以上是 <code>STXR</code> 原型，其<strong>把 <code>Xt</code> 寄存器的值原子地存储到 <code>Xn</code> 或者 <code>SP</code> 地址里，执行的结果反映到 <code>Ws</code> 寄存器中</strong>：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ASM" data-lang="ASM"><span style="display:flex;"><span><span style="color:#a6e22e">ldxr</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">xt</span><span style="color:#960050;background-color:#1e0010">&gt;，</span> [<span style="color:#66d9ef">xn</span> <span style="color:#960050;background-color:#1e0010">|</span> <span style="color:#66d9ef">sp</span>]
+</span></span></code></pre></div><p>以上是 <code>LDXR</code> 原型，其把 <code>Xn</code> 或 <code>SP</code> 地址的值原子地加载到 <code>Xt</code> 寄存器里。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ASM" data-lang="ASM"><span style="display:flex;"><span><span style="color:#a6e22e">stxr</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">ws</span><span style="color:#960050;background-color:#1e0010">&gt;</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">xt</span><span style="color:#960050;background-color:#1e0010">&gt;</span> [<span style="color:#66d9ef">xn</span> <span style="color:#960050;background-color:#1e0010">|</span> <span style="color:#66d9ef">sp</span>]
+</span></span></code></pre></div><p>以上是 <code>STXR</code> 原型，其<strong>把 <code>Xt</code> 寄存器的值原子地存储到 <code>Xn</code> 或者 <code>SP</code> 地址里，执行的结果反映到 <code>Ws</code> 寄存器中</strong>：</p>
 <ul>
 <li>若 <code>Ws</code> 寄存器的值为 0, 则说明这段时间内没有其它处理器修改过该内存地址中的内容，写入成功。</li>
 <li>若 <code>Ws</code> 寄存器的值为 1, 则说明这段时间内有其它处理器修改过该内存地址中的内容，写入失败，此时需要跳转到 <code>LDXR</code> 处重复上述过程。</li>
