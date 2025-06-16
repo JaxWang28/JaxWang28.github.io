@@ -73,7 +73,7 @@ struct page *mem_map;
 EXPORT_SYMBOL(mem_map);
 #endif
 </code></pre><p><strong>Example</strong> <em>物理地址空间 4MB PAGE_SIZE 4KB 的 Linux 系统</em>
-<img src="https://img.jaxwang.top/2025/04/0068e2e33ea222f51b9b2c73f2db3834.png" alt=""></p>
+<img src="https://img.jaxwang28.top/2025/04/0068e2e33ea222f51b9b2c73f2db3834.png" alt=""></p>
 <p>FLATMEM 物理内存模型，大多数架构中，内存空洞也会有对应的 entry，但是永远不会被初始化。</p>
 <p>某些体系结构可能会释放那些不对应实际物理页面的 <code>mem_map</code> 数组部分。在这种情况下，体系结构特定的 <code>pfn_valid()</code> 实现需要考虑 <code>mem_map</code> 中的空洞。</p>
 <h3 id="pfn---struct-page">PFN &lt;-&gt; struct page</h3>
@@ -116,7 +116,7 @@ EXPORT_SYMBOL(mem_section);
 #define PFN_SECTION_SHIFT       (SECTION_SIZE_BITS - PAGE_SHIFT)
 #define PAGES_PER_SECTION       (1UL &lt;&lt; PFN_SECTION_SHIFT)
 </code></pre><p><strong>Example</strong> <em>PAGE_SIZE 4KB 的 Linux 系统</em></p>
-<p><img src="https://img.jaxwang.top/2025/04/fdda9f44385a4f7f2a896762576dc212.png" alt=""></p>
+<p><img src="https://img.jaxwang28.top/2025/04/fdda9f44385a4f7f2a896762576dc212.png" alt=""></p>
 <p>当物理地址空间中出现 <code>128MB</code> 空洞时，并且这 <code>128MB</code> 空洞是与 128MB 对齐的就可以减少这部分的 <code>struct page</code> 分配而节省内存。</p>
 <h3 id="pfn---struct-page-1">PFN &lt;-&gt; struct page</h3>
 <p><a href="https://docs.kernel.org/mm/memory-model.html#:~:text=With%20SPARSEMEM%20there%20are%20two%20possible%20ways%20to%20convert%20a%20PFN%20to%20the%20corresponding%20struct%20page">ref</a></p>
