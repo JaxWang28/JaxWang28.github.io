@@ -45,25 +45,143 @@
 <div class="markdown-box">
 <main class="markdown-body">
 <h1 id="linux-kernel-内核同步之原子操作">Linux Kernel 内核同步之原子操作</h1>
-<p>原子操作是指指令以原子的方式执行，执行过程不会被打断。要保证操作的原子性和完整性，需要“原子地”（不间断地）完整<strong>读-修改-回写</strong>机制。</p>
+<p>原子操作是指指令以原子的方式执行，执行过程不会被打断。要保证操作的原子性和完整性，需要“原子地”（不间断地）完整 <strong>读-修改-回写（RMW）</strong> 机制。</p>
 <pre tabindex="0"><code>static int i = 0;
-void thread_A _func()
+void thread_A_func()
 {
 	i++;
 }
-void thread_B _func()
+void thread_B_func()
 {
 	i++;
 }
 </code></pre><p>上面代码的理想执行结果是<code>i</code> 为 2，但事实并非如此， i 有一定的概率为 1。对于 <code>thread_A</code> 和 <code>thread_B</code> 进行的操作可以简单理解为：<strong>读 - 修改 - 回写</strong>。从单处理器和多处理器角度分析：</p>
 <ul>
-<li>单处理器：<code>thread_A</code> 与 <code>thread_B</code> 存在并发，当 <code>thread_A</code> 执行完 <code>读</code> 操作，CPU 有可能切换为 <code>thread_B</code> 执行 <code>读</code> 操作，这样最终的结果为 1.</li>
-<li>多处理器：<code>thread_A</code> 与 <code>thread_B</code> 存在并发，<code>thread_A</code> 与 <code>thread_B</code> 可能同时执行 <code>读</code> 操作，这样最终结果也为 1.</li>
+<li>单核处理器：<code>thread_A</code> 与 <code>thread_B</code> 存在并发，当 <code>thread_A</code> 执行完 <code>读</code> 操作，CPU 有可能切换为 <code>thread_B</code> 执行 <code>读</code> 操作，这样最终的结果为 1.</li>
+<li>多核处理器：<code>thread_A</code> 与 <code>thread_B</code> 存在并行，<code>thread_A</code> 与 <code>thread_B</code> 可能同时执行 <code>读</code> 操作，这样最终结果也为 1.</li>
 </ul>
-<p>因此，要想保证结果的正确性，我们必须保证上面的操作完整地原子地（不间断地）完成<strong>读-修改-回写</strong>。</p>
-<p>原子操作是以硬件为基础，即 <strong>CPU 必须提供原子操作的汇编指令</strong>。本文以 ARMv8 架构为例从下至上分析原子操作。</p>
-<h2 id="一arm64-原子操作">一、ARM64 原子操作</h2>
-<p>原子操作需要处理器提供硬件支持，ARMv8 提供两种方式实现了原子操作：</p>
+<p>因此，要想保证结果的正确性，我们必须保证上面的操作完整地原子地（不间断地）完成 <strong>读-修改-回写</strong>。</p>
+<h2 id="一linux-内核提供原子操作-api">一、Linux 内核提供原子操作 API</h2>
+<p>Linux 内核提供了两组原子操作 API 函数，一组是对整形变量进行操作的，一组是对位进行操作的，我们接下来看一下这些 API 函数。</p>
+<h3 id="原子整形操作-api">原子整形操作 API</h3>
+<pre tabindex="0"><code>typedef struct {
+	int counter;
+} atomic_t;
+
+typedef struct {
+	s64 counter;
+} atomic64_t;
+atomic_t v = ATOMIC_INIT(0);
+atomic_set(&amp;v, 10);
+atomic_read(&amp;v);
+atomic_inc(&amp;v);
+</code></pre><table>
+  <thead>
+      <tr>
+          <th>API</th>
+          <th>Descrption</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>ATOMIC_INIT(int i)</code></td>
+          <td>定义原子变量的时候对其初始化。</td>
+      </tr>
+      <tr>
+          <td><code>int atomic_read(atomic_t *v)</code></td>
+          <td>读取 v 的值，并且返回。</td>
+      </tr>
+      <tr>
+          <td><code>void atomic_set(atomic_t *v, int i)</code></td>
+          <td>向 v 写入 i 值。</td>
+      </tr>
+      <tr>
+          <td><code>void atomic_add(int i, atomic_t *v)</code></td>
+          <td>给 v 加上 i 值。</td>
+      </tr>
+      <tr>
+          <td><code>void atomic_sub(int i, atomic_t *v)</code></td>
+          <td>从 v 减去 i 值。</td>
+      </tr>
+      <tr>
+          <td><code>void atomic_inc(atomic_t *v)</code></td>
+          <td>给 v 加 1，也就是自增。</td>
+      </tr>
+      <tr>
+          <td><code>void atomic_dec(atomic_t *v)</code></td>
+          <td>从 v 减 1，也就是自减</td>
+      </tr>
+      <tr>
+          <td><code>int atomic_dec_return(atomic_t *v)</code></td>
+          <td>从 v 减 1，并且返回 v 的值。</td>
+      </tr>
+      <tr>
+          <td><code>int atomic_inc_return(atomic_t *v)</code></td>
+          <td>给 v 加 1，并且返回 v 的值。</td>
+      </tr>
+      <tr>
+          <td><code>int atomic_sub_and_test(int i, atomic_t *v)</code></td>
+          <td>从 v 减 i，如果结果为 0 就返回真，否则返回假</td>
+      </tr>
+      <tr>
+          <td><code>int atomic_dec_and_test(atomic_t *v)</code></td>
+          <td>从 v 减 1，如果结果为 0 就返回真，否则返回假</td>
+      </tr>
+      <tr>
+          <td><code>int atomic_inc_and_test(atomic_t *v)</code></td>
+          <td>给 v 加 1，如果结果为 0 就返回真，否则返回假</td>
+      </tr>
+      <tr>
+          <td><code>int atomic_add_negative(int i, atomic_t *v)</code></td>
+          <td>给 v 加 i，如果结果为负就返回真，否则返回假</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="原子位操作-api">原子位操作 API</h3>
+<p>原子位操作是直接对内存进行操作</p>
+<table>
+  <thead>
+      <tr>
+          <th>API</th>
+          <th>Descrption</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>void set_bit(int nr, void *p)</code></td>
+          <td>将 p 地址的第 nr 位置 1。</td>
+      </tr>
+      <tr>
+          <td><code>void clear_bit(int nr,void *p)</code></td>
+          <td>将 p 地址的第 nr 位清零。</td>
+      </tr>
+      <tr>
+          <td><code>void change_bit(int nr, void *p)</code></td>
+          <td>将 p 地址的第 nr 位进行翻转。</td>
+      </tr>
+      <tr>
+          <td><code>int test_bit(int nr, void *p)</code></td>
+          <td>获取 p 地址的第 nr 位的值。</td>
+      </tr>
+      <tr>
+          <td><code>int test_and_set_bit(int nr, void *p)</code></td>
+          <td>将 p 地址的第 nr 位置 1，并且返回 nr 位原来的值。</td>
+      </tr>
+      <tr>
+          <td><code>int test_and_clear_bit(int nr, void *p)</code></td>
+          <td>将 p 地址的第 nr 位清零，并且返回 nr 位原来的值。</td>
+      </tr>
+      <tr>
+          <td><code>int test_and_change_bit(int nr, void *p)</code></td>
+          <td>将 p 地址的第 nr 位翻转，并且返回 nr 位原来的值。</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="二arm-原子操作底层支持">二、Arm 原子操作底层支持</h2>
+<p>事实上，对于单核处理器，原子操作并不需要特殊的底层实现，因为单核系统主要是因为并发引起的。因此在单核系统中原子操作的 API 是通过禁用内核抢断实现的。即 <code>禁用内核抢占 -&gt; 读-修改-回写 -&gt; 打开内核抢占</code> 。</p>
+<p>多核系统(SMP)要比单核系统中的原子操作面临更多的问题。多个 CPU 会同时读取同一内存单元，此时存储器仲裁器插手，只允许其中一个访问另一个延迟。尽管如此，第一个完成读操作的 CPU 还没有及时回写新的值，两个 CPU 都会读取旧值。最终全局结果错误。</p>
+<p>x86 处理器的常用做法是给总线上锁 bus lock。在一定时间内独占内存。下面讨论一下 Arm 中如何提供硬件支持。</p>
+<p>ARMv8 提供两种方式实现了原子操作：</p>
 <ol>
 <li>独占内存访问指令：独占加载（Load-Exclusive）和独占存储（Store-Exclusive）指令，其实现方式叫做连接加载/条件存储（Load-Link/Store-Conditional, LL/SC）</li>
 <li>原子内存访问指令：ARMv8.1 体系实现的 LSE 指令</li>
@@ -81,10 +199,10 @@ void thread_B _func()
 <li><code>LDXR</code>：独占内存加载指令，其以独占方式加载内存地址的值到通用寄存器</li>
 <li><code>STXR</code>：独占内存存储指令，其以独占方式把数据存储到内存中</li>
 </ul>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ASM" data-lang="ASM"><span style="display:flex;"><span><span style="color:#a6e22e">ldxr</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">xt</span><span style="color:#960050;background-color:#1e0010">&gt;，</span> [<span style="color:#66d9ef">xn</span> <span style="color:#960050;background-color:#1e0010">|</span> <span style="color:#66d9ef">sp</span>]
-</span></span></code></pre></div><p>以上是 <code>LDXR</code> 原型，其把 <code>Xn</code> 或 <code>SP</code> 地址的值原子地加载到 <code>Xt</code> 寄存器里。</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-ASM" data-lang="ASM"><span style="display:flex;"><span><span style="color:#a6e22e">stxr</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">ws</span><span style="color:#960050;background-color:#1e0010">&gt;</span> <span style="color:#960050;background-color:#1e0010">&lt;</span><span style="color:#66d9ef">xt</span><span style="color:#960050;background-color:#1e0010">&gt;</span> [<span style="color:#66d9ef">xn</span> <span style="color:#960050;background-color:#1e0010">|</span> <span style="color:#66d9ef">sp</span>]
-</span></span></code></pre></div><p>以上是 <code>STXR</code> 原型，其<strong>把 <code>Xt</code> 寄存器的值原子地存储到 <code>Xn</code> 或者 <code>SP</code> 地址里，执行的结果反映到 <code>Ws</code> 寄存器中</strong>：</p>
+<pre tabindex="0"><code>ldxr &lt;xt&gt;， [xn | sp]
+</code></pre><p>以上是 <code>LDXR</code> 原型，其把 <code>Xn</code> 或 <code>SP</code> 地址的值原子地加载到 <code>Xt</code> 寄存器里。</p>
+<pre tabindex="0"><code>stxr &lt;ws&gt; &lt;xt&gt; [xn | sp]
+</code></pre><p>以上是 <code>STXR</code> 原型，其<strong>把 <code>Xt</code> 寄存器的值原子地存储到 <code>Xn</code> 或者 <code>SP</code> 地址里，执行的结果反映到 <code>Ws</code> 寄存器中</strong>：</p>
 <ul>
 <li>若 <code>Ws</code> 寄存器的值为 0, 则说明这段时间内没有其它处理器修改过该内存地址中的内容，写入成功。</li>
 <li>若 <code>Ws</code> 寄存器的值为 1, 则说明这段时间内有其它处理器修改过该内存地址中的内容，写入失败，此时需要跳转到 <code>LDXR</code> 处重复上述过程。</li>
@@ -98,21 +216,20 @@ void atomic_add(int i, atomic_t *v)
 {
 	unsigned long tmp;
 	int result;
-	asm volatile(&#34;// atomic_add\n&#34;  
-	&#34;1: ldxr%w0, [%2]\n&#34;            // 读：原子加载 v-&gt;counter
-	&#34; add%w0, %w0, %w3\n&#34;           // 修改：+ i
-	&#34; stxr%w1, %w0, [%2]\n&#34;         // 回写：原子存储到 v-&gt;counter
+	asm volatile(&#34;// atomic_add\\\\n&#34;
+	&#34;1: ldxr%w0, [%2]\\\\n&#34;            // 读：原子加载 v-&gt;counter
+	&#34; add%w0, %w0, %w3\\\\n&#34;           // 修改：+ i
+	&#34; stxr%w1, %w0, [%2]\\\\n&#34;         // 回写：原子存储到 v-&gt;counter
 	&#34; cbnz%w1, 1b&#34;                  // 如果失败则重复上面过程
 	: &#34;=&amp;r&#34; (result), &#34;=&amp;r&#34; (tmp)
 	: &#34;r&#34; (&amp;v-&gt;counter), &#34;Ir&#34; (i)
 	: &#34;cc&#34;);
 }
-</code></pre><h3 id="原子内存访问操作指令">原子内存访问操作指令</h3>
+</code></pre><h3 id="原子内存访问操作指令-lse">原子内存访问操作指令 LSE</h3>
 <p>在 ARMv8.1 体系结构中新增了原子内存访问操作指令 atomic memory access instruction，也被称为 LSE Large System Extension</p>
 <p>本文不对细节进行深究，只需知道下面指令</p>
 <p>原子加载（atomic load）指令：加载地址中的值并保存，做运算</p>
-<p>原子存储（atomic store）指令，先运算，然后原子地存储。
-上述两类指令的执行过程都是原子性的</p>
+<p>原子存储（atomic store）指令，先运算，然后原子地存储。 上述两类指令的执行过程都是原子性的</p>
 <p>LSE 提供三类指令：</p>
 <ul>
 <li>比较并交换 Compare And Swap CAS 指令</li>
@@ -171,27 +288,35 @@ xt = tmp         // 返回旧值
       </tr>
   </tbody>
 </table>
-<h2 id="二linux-kernel-原子操作">二、Linux Kernel 原子操作</h2>
+<h3 id="ldsc-lse-对比">LD/SC LSE 对比</h3>
+<p>LSE 几乎在所有方面都优于 LD/SC。</p>
+<p>LD/SC 提供了一套机制，我们需要根据这个机制来实现复杂的原子操作，以及其中的监控重复机制带来了以下问题：</p>
+<ul>
+<li>代码复杂</li>
+<li>性能开销，多核竞争激励的情况下，会产生大量失败重复。</li>
+<li>活锁风险，极端争用下，两大核心互使对方 <code>STLXR</code> 失败。</li>
+</ul>
+<p>LSE 使用单一硬件指令，很大程度的解决了上述问题。</p>
+<h2 id="三arm-linux-原子操作实现分析">三、Arm Linux 原子操作实现分析</h2>
 <p>接下来从 Linux 源码角度分析原子操作。正如前文所言 ARMv8 支持两种形式的原子操作 <code>LD/SC</code> 和 <code>LSE</code>，在 Linux Kernel 中的体现如下：</p>
 <pre tabindex="0"><code>// arch/arm64/include/asm/atomic.h
 
-#define ATOMIC_OP(op)							                \
-static __always_inline void arch_##op(int i, atomic_t *v)		\
-{									                            \
-	__lse_ll_sc_body(op, i, v);					                \
+#define ATOMIC_OP(op)							                \\\\
+static __always_inline void arch_##op(int i, atomic_t *v)		\\\\
+{									                            \\\\
+	__lse_ll_sc_body(op, i, v);					                \\\\
 }
-</code></pre><pre tabindex="0"><code>// arch/arm64/include/asm/lse.h
+// arch/arm64/include/asm/lse.h
 
-#define __lse_ll_sc_body(op, ...)					        \
-({									                        \
-	alternative_has_cap_likely(ARM64_HAS_LSE_ATOMICS) ?		\
-		__lse_##op(__VA_ARGS__) :				            \
-		__ll_sc_##op(__VA_ARGS__);				            \
+#define __lse_ll_sc_body(op, ...)					        \\\\
+({									                        \\\\
+	alternative_has_cap_likely(ARM64_HAS_LSE_ATOMICS) ?		\\\\
+		__lse_##op(__VA_ARGS__) :				            \\\\
+		__ll_sc_##op(__VA_ARGS__);				            \\\\
 })
 </code></pre><p>对于一个原子操作 <code>op</code> 内核会在 <code>__lse_ll_sc_body</code> 中判断其是否支持 <code>LSE</code>，如果支持则使用 <code>LSE</code> 方式，接下来我们分别从 <code>LSE</code> 和 <code>LD/SC</code> 角度分析。</p>
-<p><strong>Linux Kernel 原子操作的 LD/SC 实现</strong></p>
+<h3 id="ldsc-实现">LD/SC 实现</h3>
 <pre tabindex="0"><code>// arch/arm64/include/asm/atomic_ll_sc.h
-
 
 /*
  * AArch64 UP and SMP safe atomic ops.  We use load exclusive and
@@ -199,41 +324,41 @@ static __always_inline void arch_##op(int i, atomic_t *v)		\
  * to ensure that the update happens.
  */
 
-#define ATOMIC_OP(op, asm_op, constraint)				\
-static __always_inline void						        \
-__ll_sc_atomic_##op(int i, atomic_t *v)					\
-{									                    \
-	unsigned long tmp;						            \
-	int result;							                \
-									                    \
-	asm volatile(&#34;// atomic_&#34; #op &#34;\n&#34;				    \
-	&#34;	prfm	pstl1strm, %2\n&#34;				        \
-	&#34;1:	ldxr	%w0, %2\n&#34;					            \
-	&#34;	&#34; #asm_op &#34;	%w0, %w0, %w3\n&#34;			        \
-	&#34;	stxr	%w1, %w0, %2\n&#34;					        \
-	&#34;	cbnz	%w1, 1b\n&#34;					            \
-	: &#34;=&amp;r&#34; (result), &#34;=&amp;r&#34; (tmp), &#34;+Q&#34; (v-&gt;counter)	\
-	: __stringify(constraint) &#34;r&#34; (i));				    \
+#define ATOMIC_OP(op, asm_op, constraint)				\\\\
+static __always_inline void						        \\\\
+__ll_sc_atomic_##op(int i, atomic_t *v)					\\\\
+{									                    \\\\
+	unsigned long tmp;						            \\\\
+	int result;							                \\\\
+									                    \\\\
+	asm volatile(&#34;// atomic_&#34; #op &#34;\\\\n&#34;				    \\\\
+	&#34;	prfm	pstl1strm, %2\\\\n&#34;				        \\\\
+	&#34;1:	ldxr	%w0, %2\\\\n&#34;					            \\\\
+	&#34;	&#34; #asm_op &#34;	%w0, %w0, %w3\\\\n&#34;			        \\\\
+	&#34;	stxr	%w1, %w0, %2\\\\n&#34;					        \\\\
+	&#34;	cbnz	%w1, 1b\\\\n&#34;					            \\\\
+	: &#34;=&amp;r&#34; (result), &#34;=&amp;r&#34; (tmp), &#34;+Q&#34; (v-&gt;counter)	\\\\
+	: __stringify(constraint) &#34;r&#34; (i));				    \\\\
 }
-</code></pre><p><strong>Linux Kernel 原子操作的 LSE 实现</strong></p>
+</code></pre><h3 id="lse-实现">LSE 实现</h3>
 <pre tabindex="0"><code>// arch/arm64/include/asm/lse.h
 
-#define __LSE_PREAMBLE	&#34;.arch_extension lse\n&#34;
-</code></pre><pre tabindex="0"><code>// arch/arm64/include/asm/atomic_lse.h
+#define __LSE_PREAMBLE	&#34;.arch_extension lse\\\\n&#34;
+// arch/arm64/include/asm/atomic_lse.h
 
-#define ATOMIC64_OP(op, asm_op)						    \
-static __always_inline void						        \
-__lse_atomic64_##op(s64 i, atomic64_t *v)				\
-{									                    \
-	asm volatile(							            \
-	__LSE_PREAMBLE							            \
-	&#34;	&#34; #asm_op &#34;	%[i], %[v]\n&#34;				        \
-	: [v] &#34;+Q&#34; (v-&gt;counter)						        \
-	: [i] &#34;r&#34; (i));							            \
+#define ATOMIC64_OP(op, asm_op)						    \\\\
+static __always_inline void						        \\\\
+__lse_atomic64_##op(s64 i, atomic64_t *v)				\\\\
+{									                    \\\\
+	asm volatile(							            \\\\
+	__LSE_PREAMBLE							            \\\\
+	&#34;	&#34; #asm_op &#34;	%[i], %[v]\\\\n&#34;				        \\\\
+	: [v] &#34;+Q&#34; (v-&gt;counter)						        \\\\
+	: [i] &#34;r&#34; (i));							            \\\\
 }
-</code></pre><h2 id="references">References</h2>
-<p>[1] Bovet, Daniel P., and Marco Cesati. <em>Understanding the Linux Kernel</em>. 3rd ed, O’Reilly, 2006.</p>
+</code></pre><p>[1] Bovet, Daniel P., and Marco Cesati. <em>Understanding the Linux Kernel</em>. 3rd ed, O’Reilly, 2006.</p>
 <p>[2] 奔跑吧Linux社区.ARM64体系结构编程与实践.2022.</p>
+<p>[3] 读写一气呵成 - Linux中的原子操作 <a href="https://zhuanlan.zhihu.com/p/89299392">https://zhuanlan.zhihu.com/p/89299392</a></p>
 
 </main>
 </div>
