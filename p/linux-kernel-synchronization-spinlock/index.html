@@ -50,29 +50,138 @@
 <div class="markdown-box">
 <main class="markdown-body">
 <h1 id="linux-kernel-内核同步之自旋锁">Linux Kernel 内核同步之自旋锁</h1>
-<p>加锁（locking）是一种广泛应用的同步技术。当要访问<strong>共享数据结构</strong>或进入<strong>临界区</strong>时，为自己获得一把“锁”，离开时再释放锁。在获得锁到释放锁之间的之短时间内是禁止其他 CPU 访问的。</p>
-<pre tabindex="0"><code>spin_lock(&amp;lock);
-...
-spin_unlock(&amp;lock);
-</code></pre><p>不同系统架构的自旋锁实现是不同的：</p>
+<p><strong>原子操作只能对整形变量或者位进行保护</strong>，事实上，临界区不是只有整型变量和位这么简单。加锁（locking）是另一种广泛应用的同步技术。当要访问<strong>共享数据结构</strong>或进入<strong>临界区</strong>时，为自己获得一把“锁”，离开时再释放锁。在获得锁到释放锁之间的时间内是禁止其他进程访问的。</p>
+<pre tabindex="0"><code>spinlock_t lock;     // 定义自旋锁
+
+spin_lock(&amp;lock);    // 上锁
+/* 临界区 */
+spin_unlock(&amp;lock);  // 释放锁
+</code></pre><h2 id="一linux-kernel-自旋锁-api">一、Linux Kernel 自旋锁 API</h2>
+<table>
+  <thead>
+      <tr>
+          <th>API</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>DEFINE_SPINLOCK(spinlock_t lock)</code></td>
+          <td>定义并初始化一个自选变量。</td>
+      </tr>
+      <tr>
+          <td><code>int spin_lock_init(spinlock_t *lock)</code></td>
+          <td>初始化自旋锁。</td>
+      </tr>
+      <tr>
+          <td><code>void spin_lock(spinlock_t *lock)</code></td>
+          <td>获取指定的自旋锁，也叫做加锁。</td>
+      </tr>
+      <tr>
+          <td><code>void spin_unlock(spinlock_t *lock)</code></td>
+          <td>释放指定的自旋锁。</td>
+      </tr>
+      <tr>
+          <td><code>int spin_trylock(spinlock_t *lock)</code></td>
+          <td>尝试获取指定的自旋锁，如果没有获取到就返回 0</td>
+      </tr>
+      <tr>
+          <td><code>int spin_is_locked(spinlock_t *lock)</code></td>
+          <td>检查指定的自旋锁是否被获取，如果没有被获取就<br>返回非 0，否则返回 0。</td>
+      </tr>
+  </tbody>
+</table>
+<p>上述 API 自动禁止内核抢占，但是不会禁用本地中断。<strong>当需要上锁的共享资源会在中断处理中被访问，我们需要使用禁止本地中断的锁</strong>。否则，当线程 A 上锁内核资源后触发中断，中断程序中获得相同的锁，会造成死锁。为此 Kernel 提供了以下 API：</p>
+<table>
+  <thead>
+      <tr>
+          <th>API</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>void spin_lock_irq(spinlock_t *lock)</code></td>
+          <td>禁止本地中断，并获取自旋锁。</td>
+      </tr>
+      <tr>
+          <td><code>void spin_unlock_irq(spinlock_t *lock)</code></td>
+          <td>激活本地中断，并释放自旋锁。</td>
+      </tr>
+      <tr>
+          <td><code>void spin_lock_irqsave(spinlock_t *lock,unsigned long flags)</code></td>
+          <td>保存中断状态，禁止本地中断，并获取自旋锁。</td>
+      </tr>
+      <tr>
+          <td><code>void spin_unlock_irqrestore(spinlock_t *lock, unsigned long flags)</code></td>
+          <td>将中断状态恢复到以前的状态,并且激活本地中断，释放自旋锁</td>
+      </tr>
+  </tbody>
+</table>
+<p><code>spin_lock_irq()</code> <strong>在任何情况下都是安全的</strong>，但是没有 <code>spin_lock()</code> 快。[3]</p>
+<p>建议使用 <code>spin_lock_irqsave</code> / <code>spin_unlock_irqrestore</code>，因为这一组函数会保存中断状态，在释放锁的时候会恢复中断状态。一般在线程中使用 <code>spin_lock_irqsave</code> / <code>spin_unlock_irqrestore</code></p>
+<h2 id="二自旋锁注意事项">二、自旋锁注意事项</h2>
 <ol>
-<li>不支持内核抢占的单处理器：自旋锁的实现是空的</li>
-<li>支持内核抢占的单处理器：自旋锁的实现仅仅是禁止或启用<strong>内核抢占</strong>。参考下面例子：
-<ol>
-<li>线程 A 获得锁</li>
-<li>线程 B 抢占内核获得执行权</li>
-<li>线程 B 获取相同锁发现已被锁</li>
-<li>. 线程 B 的优先级高于线程 A，死锁</li>
+<li><strong>自旋</strong>：等待自旋锁的线程会一直处于自旋状态，这样会浪费处理器时间，降低系统性能，所以自旋锁的持有时间不能太长。自旋锁适用于短时期的轻量级加锁，如果遇到需要长时间持有锁的场景那就需要换其他的方法了</li>
+<li><strong>睡眠</strong>：被自旋锁保护的临界区一定不能调用任何能够引起睡眠和阻塞的API 函数，否则的话会可能会导致死锁现象的发生。如果线程 A 在持有锁期间进入了休眠状态，那么线程 A 会自动放弃 CPU 使用权。线程 B 开始运行，线程 B 也想要获取锁，但是此时锁被 A 线程持有。此时 线程 B 只能空等，直到下一次调度到线程 A 并释放资源。注意：<strong>线程 B 在获得锁的自旋期间是可抢占的</strong>。这有效的避免了死锁。</li>
+<li><strong>中断</strong>：中断里面可以使用自旋锁，但是在中断里面使用自旋锁的时候，在获取锁之前一定要先禁止本地中断(也就是本 CPU 中断，对于多核 SOC来说会有多个 CPU 核)，否则可能导致锁死现象的发生</li>
+<li><strong>下半部</strong>：下半部(BH)也会竞争共享资源，如果要在下半部里面使用自旋锁，可以使用下面 API：</li>
 </ol>
+<table>
+  <thead>
+      <tr>
+          <th>API</th>
+          <th>Description</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>void spin_lock_bh(spinlock_t *lock)</code></td>
+          <td>关闭下半部，并获取自旋锁。</td>
+      </tr>
+      <tr>
+          <td><code>void spin_unlock_bh(spinlock_t *lock)</code><br></td>
+          <td>打开下半部，并释放自旋锁。</td>
+      </tr>
+  </tbody>
+</table>
+<h2 id="三自旋锁衍生">三、自旋锁衍生</h2>
+<table>
+  <thead>
+      <tr>
+          <th>自旋锁</th>
+          <th>读写锁</th>
+          <th>顺序锁</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>绝对互斥</td>
+          <td>读共享，写独占</td>
+          <td>写者优先，读者乐观验证<br></td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="读写锁">读写锁</h3>
+<p><strong>读锁 (Read Lock)</strong>: 多个线程可以同时持有读锁。一个线程在请求读锁时，如果当前没有写者持有锁，它就可以立即获得锁并进入临界区。</p>
+<p><strong>写锁 (Write Lock)</strong>: 写锁是完全互斥的。一个线程在请求写锁时，必须等待所有读者和任何已存在的写者都释放锁之后，才能获得锁。当一个写者持有锁时，其他任何线程（无论是读者还是写者）都必须等待。</p>
+<p>核心思想：<strong>读共享，写独占 (Shared-Read, Exclusive-Write)</strong></p>
+<h3 id="顺序锁">顺序锁</h3>
+<p>顺序锁是一种为“读多写少”场景设计的、给予写者极高优先级的轻量级同步机制。它允许读者和写者并发执行，读者通过一个序列计数器来检测在读取期间是否有写者修改了数据。</p>
+<p>顺序锁的设计哲学非常激进，它建立在几个关键假设之上：</p>
+<ol>
+<li>写者至上 (Writers are rare and fast): 写入操作非常少，但一旦发生，必须以最快的速度完成，不能被任何读者拖延。</li>
+<li>读者乐观 (Readers are optimistic): 读者乐观地认为，在它读取数据的短暂瞬间，不太可能会有写者闯入。因此，它不加锁就直接去读。</li>
+<li>事后验证 (Verification after the fact): 读者在读完后，必须通过一种机制来验证自己的“乐观”是否正确。这个机制就是序列计数器。
+<ul>
+<li>写者进入前，序列号+1（变为奇数）。</li>
+<li>写者退出后，序列号再+1（变回偶数）。</li>
+<li>读者读取前后检查序列号，如果序列号未变且为偶数，则读取有效。否则，读取的数据可能被“污染”，必须重试。</li>
+</ul>
 </li>
-<li>支持内核抢占的多处理器：需要完整实现自旋锁</li>
 </ol>
-<p><code>spin_lock</code> 是不会禁用<strong>本地中断</strong>的，但是提供了 <code>spin_lock_irq</code> ，其不仅会禁用内核抢占并且会禁用本地中断。当需要上锁的共享资源会在中断处理中被访问，我们需要使用禁止本地中断的锁，原因如下：</p>
-<ol>
-<li>线程 A 获得锁</li>
-<li>触发中断，中断处理中要获得相同锁，死锁</li>
-</ol>
-<p><code>spin_lock_irq()</code> 在任何情况下都是安全的，但是没有 <code>spin_lock()</code> 快。[3]</p>
+<p>核心理念：<strong>写者优先，读者乐观验证 (Writer-Priority, Optimistic-Read-with-Verify)</strong></p>
+<h2 id="三自旋锁的发展">三、自旋锁的发展</h2>
 <table>
   <thead>
       <tr>
@@ -134,76 +243,31 @@ Date:   Tue Mar 13 20:45:45 2018 +0000
     It&#39;s fair to say that our ticket lock has served us well over time, but
     it&#39;s time to bite the bullet and start using the generic qspinlock code
     so we can make use of explicit MCS queuing and potentially better PV
-</code></pre><h2 id="一spinlock-apis">一、spinlock APIs</h2>
-<table>
-  <thead>
-      <tr>
-          <th>API</th>
-          <th>功能</th>
-      </tr>
-  </thead>
-  <tbody>
-      <tr>
-          <td>spin_lock(&amp;lock)</td>
-          <td>获取自旋锁</td>
-      </tr>
-      <tr>
-          <td>spin_unlock(&amp;lock)</td>
-          <td>释放自旋锁</td>
-      </tr>
-      <tr>
-          <td>spin_trylock(&amp;lock)</td>
-          <td>尝试获取锁，成功返回 true</td>
-      </tr>
-      <tr>
-          <td>spin_is_locked(&amp;lock)</td>
-          <td>检查锁是否被持有</td>
-      </tr>
-      <tr>
-          <td>spin_unlock_wait(&amp;lock)</td>
-          <td>等待锁释放，不加锁</td>
-      </tr>
-      <tr>
-          <td>spin_lock_irq(&amp;lock)</td>
-          <td>获取锁 + 禁用本地 CPU 的中断</td>
-      </tr>
-      <tr>
-          <td>spin_unlock_irq(&amp;lock)</td>
-          <td>解锁 + 恢复中断</td>
-      </tr>
-      <tr>
-          <td>spin_lock_irqsave(&amp;lock, flags)</td>
-          <td>获取锁 + 保存当前中断状态 + 禁用中断</td>
-      </tr>
-      <tr>
-          <td>spin_unlock_irqrestore(&amp;lock, flags)</td>
-          <td>解锁 + 恢复之前的中断状态</td>
-      </tr>
-      <tr>
-          <td>spin_lock_bh(&amp;lock)</td>
-          <td>取锁 + 禁用软中断</td>
-      </tr>
-  </tbody>
-</table>
-<h2 id="二mcs-spinlock">二、MCS spinlock</h2>
+</code></pre><h3 id="mcs-spinlock">MCS spinlock</h3>
 <p>ticket spinlock 完美解决了公平问题，但是存在一个问题，就是当锁竞争比较激烈的时候，大家都在自旋同一个变量，造成 <strong>多核频繁竞争同一个缓存行</strong>，引发 <strong>缓存颠簸</strong>，进而拖慢整个系统的同步效率。为了解决这个问题，设计出一种锁，把所有排队等锁的线程放到一个队列上，每个线程自选<strong>自己的节点</strong>，因为是队列，还是一个公平锁。</p>
 <p>其算法如下：</p>
 <ol>
-<li>自旋锁是一个指针初始化为 <code>NULL</code>，如图中时刻 1</li>
-<li>当线程取锁时，先生成一个锁<code>locked=0 next=NULL</code>，检查自旋锁指针：
+<li>
+<p>自旋锁是一个指针初始化为 <code>NULL</code>，如图中时刻 1</p>
+</li>
+<li>
+<p>当线程取锁时，先生成一个锁</p>
+<pre tabindex="0"><code>locked=0 next=NULL
+</code></pre><p>，检查自旋锁指针：</p>
 <ol>
 <li>若自旋锁指针为 <code>NULL</code> ，则此前没人获得锁，将自旋锁指针指向自己的锁。如图中时刻 2</li>
 <li>若自旋锁指针不为 <code>NULL</code>，则该锁已被获得，将此时自旋锁指向的锁的 <code>next</code> 指向自己，并更新自选锁指针也为自己的锁。然后自选变量 <code>locked</code> 直至为 1，如图中时刻 3</li>
 </ol>
 </li>
-<li>当线程释放锁时：
+<li>
+<p>当线程释放锁时：</p>
 <ol>
 <li>若 <code>next</code> 不为 <code>NULL</code>，则将 <code>next-&gt;locket</code> 置为 <code>1</code>。如图中时刻 4。</li>
 <li>若 <code>next</code> 为 <code>NULL</code>，则将自旋锁变量置为 <code>NULL</code></li>
 </ol>
 </li>
 </ol>
-<p><img src="https://img.jaxwang28.top/2025/05/2633c01cacf10dc09abfdfb4706f9b18.png" alt=""></p>
+<p><img src="https://img.jaxwang28.top/2025/05/2633c01cacf10dc09abfdfb4706f9b18.png" alt="img"></p>
 <pre tabindex="0"><code>static inline
 void mcs_spin_lock(struct mcs_spinlock **lock, struct mcs_spinlock *node)
 {
@@ -222,7 +286,7 @@ void mcs_spin_lock(struct mcs_spinlock **lock, struct mcs_spinlock *node)
 	/* Wait until the lock holder passes the lock down. */
 	arch_mcs_spin_lock_contended(&amp;node-&gt;locked);   // 上述 2.2 自旋直至 locked=1
 }
-</code></pre><h2 id="三queued-spinlock">三、queued spinlock</h2>
+</code></pre><h3 id="queued-spinlock">queued spinlock</h3>
 <p>MCS 锁有一个很大的问题就是它改变了自旋锁的接口，这是一个很严重的问题，内核里使用自旋锁的地方很多，如果把自旋锁都改为MCS自旋锁，那将是非常麻烦的。同时MCS还有一个问题就是它的体积增大了，这也是一个很严重的问题。</p>
 <p>队列自旋锁对MCS自旋锁的优化原理是，一个系统最多同时有NR_CPU个自旋锁在运行，所以没必要每个加锁线程都自己分配一个锁节点，我们在系统全局预分配NR_CPU个锁节点就可以了，哪个CPU上要执行自旋锁，就去用对应的锁节点就可以了。这是对于只有线程的情况，实际上还有软中断、硬中断、NMI，它们后者都可以抢占前者，都能抢占线程，所以整个系统实际上总共需要 NR_CPU * 4 个锁节点就足够了。</p>
 <p><em>TODO 具体算法实现后面再写了。</em></p>

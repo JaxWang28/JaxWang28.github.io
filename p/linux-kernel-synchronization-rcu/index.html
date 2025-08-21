@@ -51,76 +51,76 @@
 <main class="markdown-body">
 <h1 id="linux-kernel-内核同步之-rcu">Linux Kernel 内核同步之 RCU</h1>
 <p>尽管 <code>rwlock</code> 相对于 <code>spinlock</code> 做了很大的改进，<code>rwlock</code> 允许多个读者同时并发访问。但是进行写操作时，仅有一个写者具有访问权限，读者不可访问。<code>RCU</code> 进一步改善了这个问题，其允许多个读者和写者并发执行。而且 <code>RCU</code> 是不使用锁的，其对读者几乎没有限制，访问效率极高。本文简单概述这项技术。</p>
-<h2 id="一rcu-概念理解">一、RCU 概念理解</h2>
-<p>以下面的情景引出 RCU 。</p>
-<ol>
-<li>
-<p>假设你写好一份作业，某一时刻同学A 找到你想借鉴一下你的作业，你把作业放在桌子上让同学A 借鉴。</p>
+<h2 id="一rcu-核心思想">一、RCU 核心思想</h2>
+<p><strong>读者无锁（Read），写者副本（Copy），延迟释放（Update）。</strong></p>
+<p><strong>读者：</strong></p>
+<ul>
+<li>调用 <code>rcu_read_lock()</code> / <code>rcu_read_unlock()</code> 包裹访问区域。</li>
+<li>读操作只需简单的内存屏障，<strong>不加锁</strong>，非常快，不会阻塞。</li>
+</ul>
+<p><strong>写者：</strong></p>
+<ul>
+<li>写操作流程是 <strong>复制-修改-替换</strong>：
+<ul>
+<li>分配一份新的数据副本，在新副本上修改。</li>
+<li>使用 <code>rcu_assign_pointer()</code> 替换全局指针，让读者开始访问新版。</li>
+</ul>
 </li>
-<li>
-<p>没过几分钟（同学A 还在借鉴 :) ），同学B 也来找到你，也想借鉴你一下你的作业，你指了指正在借鉴作业的同学A，说：“过去吧，你们两一起借鉴。”</p>
-</li>
-<li>
-<p>突然，你发现你的作业错写了一步，同学A 和同学B 正在借鉴（读操作）你的作业，此时你又没法修改（不可打断同学A 和同学B，也不能他们读的同时你修改）。怎么办？</p>
-</li>
-<li>
-<p>你以迅雷不及掩耳之势拿出一张A4纸（假设本次作业就是一张 A4纸），copy 原作页并开始改正。好巧不巧，此时同学C 又来借鉴你的作业了，而你此时还没改完，怎么办？那只好和同学A 同学B 一起去借鉴你的原作业。</p>
-</li>
-<li>
-<p>终于，你改正完了，此时你拥有了一份新的作业，原来那份就报废了（当然现在还不行，因为同学ABC 还在借鉴）。这时，同学D 也来了，想借鉴你的作业，这时你不能再让他借鉴你的旧作业了。你大方的指了指你的新作业。</p>
-</li>
-<li>
-<p>过了一会，同学ABC 都已经借鉴完你的旧作业了（虽然旧作业是有误的，但是你没责任提醒他们）。你发现已经没有同学借鉴你的旧作业了，你就可以把就作业销毁了。</p>
-</li>
-</ol>
-<p>以上就是一个 RCU 的过程。从上面我们发现，都是以<strong>你</strong>为中心，而不是你的作业。因此你可以拥有一份新的作业的同时暂时不销毁旧作业。你就像一个指针，指向一份作业。在拥有新作业的同时（malloc），而暂时不销毁旧作业（free）。这也就是为什么<strong>RCU 只保护被动态分配并且通过指针引用的数据结构</strong>。</p>
-<h2 id="二rcu-5-core-apis">二、RCU 5 core APIs</h2>
+</ul>
+<p><strong>回收：</strong></p>
+<ul>
+<li>旧版本不能立刻释放，因为可能仍有读者在 <code>rcu_read_lock()</code> 临界区访问它。</li>
+<li>写者调用 <code>call_rcu()</code> 或 <code>synchronize_rcu()</code>，通知系统在 <strong>宽限期（grace period）</strong> 结束后释放旧版本。</li>
+<li>宽限期保证：<strong>所有读者都退出了临界区</strong> → 没有线程再访问旧版本。</li>
+</ul>
+<p><strong>基于 RCU 的工作原理，RCU 只保护被动态分配并且通过指针引用的数据结构</strong>。</p>
+<h2 id="二rcu-core-api">二、RCU core API</h2>
 <p>The core RCU API is quite small:</p>
 <ol>
 <li>Updateer <code>rcu_assign_pointer</code></li>
 </ol>
-<pre tabindex="0"><code>  1 struct foo {
-  2   int a;
-  3   int b;
-  4   int c;
-  5 };
-  6 struct foo *gp = NULL;
-  7 
-  8 /* . . . */
-  9 
- 10 p = kmalloc(sizeof(*p), GFP_KERNEL);
- 11 p-&gt;a = 1;
- 12 p-&gt;b = 2;
- 13 p-&gt;c = 3;
- 14 gp = p;
+<pre tabindex="0"><code>struct foo {
+  int a;
+  int b;
+  int c;
+};
+struct foo *gp = NULL;
+
+/* . . . */
+
+p = kmalloc(sizeof(*p), GFP_KERNEL);
+p-&gt;a = 1;
+p-&gt;b = 2;
+p-&gt;c = 3;
+gp = p;
 </code></pre><p>根据优化和内存屏障部分我们知道 11 12 13 14 行代码不一定按照我们想要的顺序执行，其很有可能先执行 14 行，再依次赋值。因此我们需要内存和优化屏障。Linux Kernel 已经封装了 <code>rcu_assign_pointer</code> 帮我们实现上述过程。其能保证下面代码先赋值 abc 结束后，再对 gp 赋值。</p>
-<pre tabindex="0"><code>  1 p-&gt;a = 1;
-  2 p-&gt;b = 2;
-  3 p-&gt;c = 3;
-  4 rcu_assign_pointer(gp, p);
+<pre tabindex="0"><code>p-&gt;a = 1;
+p-&gt;b = 2;
+p-&gt;c = 3;
+rcu_assign_pointer(gp, p);
 </code></pre><ol start="2">
 <li><code>rcu_read_lock</code></li>
 <li><code>rcu_read_unlock</code></li>
 <li><code>rcu_dereference</code></li>
 </ol>
-<pre tabindex="0"><code>  1 p = gp;
-  2 if (p != NULL) {
-  3   do_something_with(p-&gt;a, p-&gt;b, p-&gt;c);
-  4 }
+<pre tabindex="0"><code>p = gp;
+if (p != NULL) {
+  do_something_with(p-&gt;a, p-&gt;b, p-&gt;c);
+}
 </code></pre><p>同样，我们在读取端也要有类似的操作，同时读取端还要通过上锁，保证访问内容暂时不要被回收（旧作业）。</p>
-<pre tabindex="0"><code>  1 rcu_read_lock();
-  2 p = rcu_dereference(gp);
-  3 if (p != NULL) {
-  4   do_something_with(p-&gt;a, p-&gt;b, p-&gt;c);
-  5 }
-  6 rcu_read_unlock();
+<pre tabindex="0"><code>rcu_read_lock();
+p = rcu_dereference(gp);
+if (p != NULL) {
+  do_something_with(p-&gt;a, p-&gt;b, p-&gt;c);
+}
+rcu_read_unlock();
 </code></pre><ol start="5">
 <li><code>synchronize_rcu</code> <code>call_rcu</code>
 用于回收旧资源，启用 <code>synchronize_rcu</code> 是同步，其会 block 等待旧资源上所有的锁都释放，<code>call_rcu</code> 是异步。</li>
 </ol>
 <h2 id="三rcu-基本流程">三、RCU 基本流程</h2>
-<p><img src="https://img.jaxwang28.top/2025/05/f8d5c7c2e7482d64287db39491eaaa19.png" alt=""></p>
-<h2 id="references">References</h2>
+<img src="https://img.jaxwang28.top/2025/05/f8d5c7c2e7482d64287db39491eaaa19.png" style="zoom:80%;" />
+<h2 id="ref">Ref</h2>
 <p>[1] What is RCU? &ndash; “Read, Copy, Update” <a href="https://www.kernel.org/doc/html/next/RCU/whatisRCU.html">https://www.kernel.org/doc/html/next/RCU/whatisRCU.html</a></p>
 <p>[2] What is RCU, Fundamentally? <a href="https://lwn.net/Articles/262464/">https://lwn.net/Articles/262464/</a></p>
 
