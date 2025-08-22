@@ -136,22 +136,18 @@ void with_barrier() {
 		            :   +--------+   :
 		            :                :
 </code></pre><p>假设 CPU 流水线上的指令序列如下：</p>
-<pre tabindex="0"><code>    CPU 1           CPU 2
-    ===============	===============
-    { A == 1; B == 2 }
-    A = 3;		    x = B;
-    B = 4;		    y = A;
-</code></pre><p>CPU 1 需要执行两条指令 <code>A = 3</code> <code>B = 4</code>， CPU 2 需要执行两条指令 <code>x = B</code> <code>y = A</code>。各 CPU 上执行顺序并不是代码所见，因为时乱序执行所以会有 24 种可能性。</p>
-<pre tabindex="0"><code>	STORE A=3,    STORE B=4,      y=LOAD A-&gt;3,    x=LOAD B-&gt;4
-	STORE A=3,    STORE B=4,      x=LOAD B-&gt;4,    y=LOAD A-&gt;3
-	STORE A=3,    y=LOAD A-&gt;3,    STORE B=4,      x=LOAD B-&gt;4
-	STORE A=3,    y=LOAD A-&gt;3,    x=LOAD B-&gt;2,    STORE B=4
-	STORE A=3,    x=LOAD B-&gt;2,    STORE B=4,      y=LOAD A-&gt;3
-	STORE A=3,    x=LOAD B-&gt;2,    y=LOAD A-&gt;3,    STORE B=4
-	STORE B=4,    STORE A=3,      y=LOAD A-&gt;3,    x=LOAD B-&gt;4
-	STORE B=4, ...
-	...
-</code></pre><h2 id="三arm64-中的内存屏障指令">三、ARM64 中的内存屏障指令</h2>
+<pre tabindex="0"><code>        {count = 0 flag = false}
+
+    CPU 1           | CPU 2
+    =============== | ===============
+    count=1;        | while(!flag){
+                        等待
+                    | }
+    flag=true;      | assert(count= == 1)
+</code></pre><p>理想状态下，CPU 2 断言要是成功的，因为在 CPU 1 端是先置 count 在置 flag。但是现代多核系统中，CPU 1 会对两条指令重排来提升性能。因为在 CPU 1 看来，先执行 <code>flag=true</code> 对其结果是没有影响的。</p>
+<p>因此我们需要一条强制的指令（内存屏障指令）来告诉 CPU ：
+<strong>所有在屏障之前的内存读/写操作，必须在屏障之后的所有内存读/写操作开始之前，全部完成，并且其结果对其它核心可见</strong>。</p>
+<h2 id="三arm64-中的内存屏障指令">三、ARM64 中的内存屏障指令</h2>
 <p>ARM64 处理器采用<strong>弱一致性内存模型</strong>，在该内存模型下，CPU的加载和存储访问的序列有可能和程序中的序列不一致。因此 ARM64 处理器使用内存屏障指令实现同步访问，内存屏障指令有以下原则：</p>
 <ol>
 <li>在内存屏障指令后面的所有数据访问必须等待内存屏障指令</li>
